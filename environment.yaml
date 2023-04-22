@@ -1,0 +1,25 @@
+name: LENet
+channels:
+  # - pytorch
+  # - defaults
+  # - anaconda
+  # You can use the TUNA mirror to speed up the installation if you are in mainland China.
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch-lts/
+dependencies:
+  - python=3.8.16
+  - pytorch=1.8.2
+  - torchvision=0.9.2
+  - cudatoolkit=11.1
+  - ipython
+  - tqdm
+  - numba
+  - sparsehash  # dependency for torchsparse
+  - pyqt
+  - pip
+  - pip:
+    - -r requirements.txt
+    # - git+http://github.com/mit-han-lab/torchsparse.git@v1.4.0
