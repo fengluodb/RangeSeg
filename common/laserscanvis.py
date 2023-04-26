@@ -126,7 +126,7 @@ class LaserScanVis:
 
     def update_scan(self):
         # first open data
-        self.scan.open_scan(self.scan_names[self.offset])
+        self.scan.open_scan(self.scan_names[self.offset], None, None, False)
         if self.semantics:
             self.scan.open_label(self.label_names[self.offset])
             self.scan.colorize()
