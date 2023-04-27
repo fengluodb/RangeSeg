@@ -31,20 +31,6 @@ class BasicConv2d(nn.Module):
             x = self.relu(x)
         return x
 
-class Final_Model(nn.Module):
-
-    def __init__(self, backbone_net, semantic_head):
-        super(Final_Model, self).__init__()
-        self.backend = backbone_net
-        self.semantic_head = semantic_head
-
-    def forward(self, x):
-        middle_feature_maps = self.backend(x)
-
-        semantic_output = self.semantic_head(middle_feature_maps)
-
-        return semantic_output
-
 
 class BasicBlock(nn.Module):
     expansion = 1
