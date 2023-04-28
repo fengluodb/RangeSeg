@@ -124,10 +124,9 @@ def backup_to_logdir(FLAGS, pretrain_model=False):
         os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'common'))} {code_backup_path}")
         os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'config'))} {code_backup_path}")
         os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'modules'))} {code_backup_path}")
-        os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'train_yaml'))} {code_backup_path}")
         os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'utils'))} {code_backup_path}")
         if pretrain_model:
-            shutil.copyfile(FLAGS.pretrained + "/STNet_valid_best", FLAGS.log + "/STNet_valid_best")
+            shutil.copyfile(FLAGS.pretrained + "/LTNet_valid_best", FLAGS.log + "/LTNet_valid_best")
 
     except Exception as e:
         print(e)

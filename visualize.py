@@ -79,6 +79,9 @@ if __name__ == '__main__':
     if FLAGS.what == "kitti":
         from common.laserscan import LaserScan, SemLaserScan
         from common.laserscanvis import LaserScanVis
+    elif FLAGS.what == "poss":
+        from common.posslaserscan import LaserScan, SemLaserScan
+        from common.posslaserscanvis import LaserScanVis
     else:
         raise TypeError("This type dataset doesn't exist (use kitti or poss)! Exiting...")
 
@@ -87,6 +90,9 @@ if __name__ == '__main__':
         if FLAGS.what == "kitti":
             print("Opening config file of KITTI")
             CFG = yaml.safe_load(open('config/labels/semantic-kitti.yaml', 'r'))
+        elif FLAGS.what == "poss":
+            print("Opening config file of POSS")
+            CFG = yaml.safe_load(open('config/labels/semantic-poss.yaml', 'r'))
         else:
             raise TypeError("This type dataset doesn't exist (use kitti or poss)! Exiting...")
 
@@ -110,6 +116,13 @@ if __name__ == '__main__':
     scan_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
         os.path.expanduser(scan_paths)) for f in fn]
     scan_names.sort()
+
+    if FLAGS.what == "poss":
+        tag_paths = os.path.join(FLAGS.dataset, "sequences",
+                                 FLAGS.sequence, "tag")
+        tag_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
+            os.path.expanduser(tag_paths)) for f in fn]
+        tag_names.sort()
 
 
     # does sequence folder exist?
@@ -152,6 +165,13 @@ if __name__ == '__main__':
                        offset=FLAGS.offset,
                        semantics=semantics,
                        instances=False)
+    elif FLAGS.what == "poss":
+        vis = LaserScanVis(scan=scan,
+                           scan_names=scan_names,
+                           tag_names=tag_names,
+                           label_names=label_names,
+                           offset=FLAGS.offset,
+                           semantics=semantics)
     # print instructions
     print("To navigate:")
     print("\tb: back (previous scan)")

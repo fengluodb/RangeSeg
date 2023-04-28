@@ -5,7 +5,7 @@ train:
   pipeline: "LENet"  # model name 
   loss: "xentropy"       # must be either xentropy or iou
   max_epochs: 50
-  batch_size: 2         # batch size
+  batch_size: 8         # batch size
   report_batch: 10       # every x batches, report loss
   report_epoch: 1        # every x epochs, report validation set
   epsilon_w: 0.001       # class weight w = 1 / (content + epsilon_w)
@@ -63,42 +63,29 @@ post:
 ################################################################################
 # dataset (to find parser)
 dataset:
-  labels: "kitti"
-  scans: "kitti"
-  max_points: 150000 # max of any scan in dataset
+  labels: "poss"
+  scans: "poss"
+  max_points: 72000 # max of any scan in dataset
   sensor:
-    name: "HDL64"
+    name: "Pandora"
     type: "spherical" # projective
-    fov_up: 3
-    fov_down: -25
+    fov_up: 7
+    fov_down: -16
     img_prop:
-      width:  2048
-      height: 64
-    img_means: #range,x,y,z,signal
-      - 11.71279
-      - -0.1023471
-      - 0.4952
-      - -1.0545
-      - 0.2877
+      width: 1800
+      height: 40
+    img_means: #range,x,y,z,signal   (40, 1800)
+      - 22.26779
+      - 0.51144063
+      - 1.5727469
+      - -0.6350901
+      - 13.875261
     img_stds: #range,x,y,z,signal
-      - 10.24
-      - 12.295865
-      - 9.4287
-      - 0.8643
-      - 0.1450
-
-    # img_means: #range,x,y,z,signal
-    #   - 12.12
-    #   - 10.88
-    #   - 0.23
-    #   - -1.04
-    #   - 0.21
-    # img_stds: #range,x,y,z,signal
-    #   - 12.32
-    #   - 11.47
-    #   - 6.91
-    #   - 0.86
-    #   - 0.16
+      - 17.735949
+      - 17.422485
+      - 22.217215
+      - 1.6433295
+      - 14.0925865
       
     # for mos
     n_input_scans: 2  # This needs to be the same as in the backbone params above!

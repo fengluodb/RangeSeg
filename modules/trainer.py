@@ -314,7 +314,6 @@ class Trainer():
                                         imgs=rand_img)
 
         print('Finished Training')
-        dist.destroy_process_group()
 
         return
 

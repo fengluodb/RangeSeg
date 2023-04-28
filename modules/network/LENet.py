@@ -127,12 +127,12 @@ class SpatialAttention(nn.Module):
         return x
 
 
-class MyBasicBlock(nn.Module):
+class BasicBlock(nn.Module):
     expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
                  base_width=64, dilation=1, if_BN=None):
-        super(MyBasicBlock, self).__init__()
+        super(BasicBlock, self).__init__()
         if groups != 1 or base_width != 64:
             raise ValueError('BasicBlock only supports groups=1 and base_width=64')
         if dilation > 1:
@@ -158,7 +158,7 @@ class MyBasicBlock(nn.Module):
 
 
 class ResNet_34(nn.Module):
-    def __init__(self, nclasses, params, block=MyBasicBlock, layers=[3, 4, 6, 3], if_BN=True, zero_init_residual=False,
+    def __init__(self, nclasses, params, block=BasicBlock, layers=[3, 4, 6, 3], if_BN=True, zero_init_residual=False,
                  norm_layer=None, groups=1, width_per_group=64):
         super(ResNet_34, self).__init__()
         self.nclasses = nclasses

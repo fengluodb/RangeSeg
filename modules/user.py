@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
+from dataset.kitti.parser import Parser
 import __init__ as booger
 
 from tqdm import tqdm
@@ -34,21 +35,21 @@ class User():
         # get the data
         parserModule = imp.load_source("parserModule",
                                        f"{booger.TRAIN_PATH}/dataset/{self.DATA['name']}/parser.py")
-        self.parser = parserModule.Parser(root=self.datadir,
-                                          train_sequences=self.DATA["split"]["train"],
-                                          valid_sequences=self.DATA["split"]["valid"],
-                                          test_sequences=self.DATA["split"]["test"],
-                                          split=self.split,
-                                          labels=self.DATA["labels"],
-                                          color_map=self.DATA["color_map"],
-                                          learning_map=self.DATA["learning_map"],
-                                          learning_map_inv=self.DATA["learning_map_inv"],
-                                          sensor=self.ARCH["dataset"]["sensor"],
-                                          max_points=self.ARCH["dataset"]["max_points"],
-                                          batch_size=self.infer_batch_size,
-                                          workers=2, # self.ARCH["train"]["workers"],
-                                          gt=True,
-                                          shuffle_train=False)
+        self.parser = Parser(root=self.datadir,
+                                train_sequences=self.DATA["split"]["train"],
+                                valid_sequences=self.DATA["split"]["valid"],
+                                test_sequences=self.DATA["split"]["test"],
+                                split=self.split,
+                                labels=self.DATA["labels"],
+                                color_map=self.DATA["color_map"],
+                                learning_map=self.DATA["learning_map"],
+                                learning_map_inv=self.DATA["learning_map_inv"],
+                                sensor=self.ARCH["dataset"]["sensor"],
+                                max_points=self.ARCH["dataset"]["max_points"],
+                                batch_size=self.infer_batch_size,
+                                workers=2, # self.ARCH["train"]["workers"],
+                                gt=True,
+                                shuffle_train=False)
 
         with torch.no_grad():
             torch.nn.Module.dump_patches = True
