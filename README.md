@@ -91,7 +91,7 @@ python evaluate.py -d DATAROOT -p /path/for/predictions -dc config/labels/semant
 |---------------|:----:|:-----------:|
 | [SemanticKITTI(single)](config/arch/LENet.yaml) | 64.5 | [Model Weight And Predictions](https://drive.google.com/drive/folders/1ejoInYl8BVzg3t69_ig4tDUYstaz--Ns?usp=sharing) |
 | [SemanticKITTI(multi)](config/arch/LENet.yaml) | 53.0 | [Model Weight And Predictions](https://drive.google.com/drive/folders/1OfktGL85mFmdRALBb-_Zpc8VSmjXJVYU?usp=sharing) |
-| [SemanticPOSS](config/arch/LENet_poss.yaml) | 53.8 | [Model Weight And Predictions]() |
+| [SemanticPOSS](config/arch/LENet_poss.yaml) | 53.8 | [Model Weight And Predictions](https://drive.google.com/drive/folders/1oECv2GRCXZ1RIQVVum-mRwZbod8pxVA8) |
 
 ## Acknowlegment
 
