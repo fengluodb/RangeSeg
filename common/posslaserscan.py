@@ -79,12 +79,12 @@ class LaserScan:
 
         tags = np.fromfile(tagname, dtype=np.bool)
 
-#         if self.rot:
-#             euler_angle = np.random.normal(-45, 45, 1)[0]  # 40
-#             r = np.array(R.from_euler('zyx', [[euler_angle, 0, 0]], degrees=True).as_matrix())
-#             r_t = r.transpose()
-#             points = points.dot(r_t)
-#             points = np.squeeze(points)
+        if self.rot:
+            euler_angle = np.random.normal(-45, 45, 1)[0]  # 40
+            r = np.array(R.from_euler('zyx', [[euler_angle, 0, 0]], degrees=True).as_matrix())
+            r_t = r.transpose()
+            points = points.dot(r_t)
+            points = np.squeeze(points)
 
         if self.DA:
             shift_x = np.random.normal(0.0, 0.7, 1)[0]
@@ -94,11 +94,11 @@ class LaserScan:
             points[:, 1] = points[:, 1] + shift_y
             points[:, 2] = points[:, 2] + shift_z
 
-#         if self.flip_sign:
-#             if random.random() > 0.5:
-#                 points[:, 0] = -points[:, 0]
-#             if random.random() > 0.5:
-#                 points[:, 1] = -points[:, 1]
+        if self.flip_sign:
+            if random.random() > 0.5:
+                points[:, 0] = -points[:, 0]
+            if random.random() > 0.5:
+                points[:, 1] = -points[:, 1]
 
         self.set_points(points, remissions, tags)
 

@@ -55,11 +55,14 @@ class User():
             torch.nn.Module.dump_patches = True
             if not point_refine:
                 self.set_model()
-                self.model = nn.DataParallel(self.model)
                 checkpoint = self.pipeline + "_valid_best"
                 w_dict = torch.load(f"{self.modeldir}/{checkpoint}", map_location=lambda storage, loc: storage)
-                self.model.load_state_dict(w_dict['state_dict'], strict=True)
-
+                try:
+                    self.model = nn.DataParallel(self.model)
+                    self.model.load_state_dict(w_dict['state_dict'], strict=True)
+                except:
+                    self.set_model()
+                    self.model.load_state_dict(w_dict['state_dict'], strict=True)
                 self.set_knn_post()
             else:
                 self.set_model()

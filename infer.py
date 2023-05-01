@@ -5,6 +5,7 @@ import os
 from utils.utils import *
 from modules.user import *
 from modules.user_refine import *
+from modules.user_poss import *
 
 
 if __name__ == '__main__':
@@ -30,8 +31,14 @@ if __name__ == '__main__':
 
     # create user and infer dataset
     if not FLAGS.pointrefine:
-        user = User(ARCH, DATA, datadir=FLAGS.dataset, outputdir=FLAGS.log,
-                    modeldir=FLAGS.model, split=FLAGS.split)
+        if DATA["name"] == "kitti":
+            user = User(ARCH, DATA, datadir=FLAGS.dataset, outputdir=FLAGS.log,
+                        modeldir=FLAGS.model, split=FLAGS.split)
+        elif DATA["name"] == "poss":
+            user = UserPoss(ARCH, DATA, datadir=FLAGS.dataset, outputdir=FLAGS.log,
+                        modeldir=FLAGS.model, split=FLAGS.split)
+        else:
+           raise ValueError("unsupported dataset {}".format(DATA["name"])) 
     else:
         user = UserRefine(ARCH, DATA, datadir=FLAGS.dataset, outputdir=FLAGS.log,
                           modeldir=FLAGS.model, split=FLAGS.split)

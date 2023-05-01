@@ -30,10 +30,10 @@ class UserPoss(User):
                              learning_map_inv=self.DATA["learning_map_inv"],
                              sensor=self.ARCH["dataset"]["sensor"],
                              max_points=self.ARCH["dataset"]["max_points"],
-                             batch_size=self.ARCH["train"]["batch_size"],
+                             batch_size=self.infer_batch_size,
                              workers=2,
                              gt=True,
-                             shuffle_train=True)
+                             shuffle_train=False)
 
     
     def infer_subset(self, loader, to_orig_fn, cnn, knn):
@@ -71,8 +71,8 @@ class UserPoss(User):
                     proj_in = proj_in.cuda()
                     unlabels = unlabels.cuda()
                     if self.post:
-                        proj_range = proj_range.cuda()
-                        unproj_range = unproj_range.cuda()
+                        proj_range = proj_range[0].cuda()
+                        unproj_range = unproj_range[0].cuda()
                 
                 end = time.time()
                 # compute output
@@ -97,6 +97,7 @@ class UserPoss(User):
                 else:
                     unproj_argmax = proj_argmax[proj_y, proj_x]
 
+                unproj_argmax = unproj_argmax[tags.squeeze()]
                 # measure elapsed time
                 if torch.cuda.is_available():
                     torch.cuda.synchronize()

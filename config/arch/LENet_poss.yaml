@@ -5,7 +5,7 @@ train:
   pipeline: "LENet"  # model name 
   loss: "xentropy"       # must be either xentropy or iou
   max_epochs: 50
-  batch_size: 8         # batch size
+  batch_size: 6         # batch size
   report_batch: 10       # every x batches, report loss
   report_epoch: 1        # every x epochs, report validation set
   epsilon_w: 0.001       # class weight w = 1 / (content + epsilon_w)
@@ -23,8 +23,8 @@ train:
   scheduler: "consine"  # "consine" or "warmup"
   consine:
     min_lr: 0.00001
-    max_lr: 0.00020
-    first_cycle: 30
+    max_lr: 0.00200
+    first_cycle: 50
     cycle: 2
     wup_epochs: 1
     gamma: 1.0
