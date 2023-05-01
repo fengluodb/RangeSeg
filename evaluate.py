@@ -87,12 +87,12 @@ def get_args():
 
 
 if __name__ == '__main__':
-    
+
     parser = get_args()
     FLAGS, unparsed = parser.parse_known_args()
-    
+
     assert(FLAGS.split in splits)     # assert split
-    assert(FLAGS.backend in backends) # assert backend
+    assert(FLAGS.backend in backends)  # assert backend
 
     # fill in real predictions dir
     if FLAGS.predictions is None:
@@ -123,7 +123,7 @@ if __name__ == '__main__':
 
     # make lookup table for mapping
     maxkey = max(class_remap.keys())
-    
+
     # +100 hack making lut bigger just in case there are unknown labels
     remap_lut = np.zeros((maxkey + 100), dtype=np.int32)
     remap_lut[list(class_remap.keys())] = list(class_remap.values())
@@ -160,7 +160,8 @@ if __name__ == '__main__':
     lidar_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        label_paths = os.path.join(FLAGS.dataset, "sequences", str(sequence), "labels")
+        label_paths = os.path.join(
+            FLAGS.dataset, "sequences", str(sequence), "labels")
         # populate the label names
         seq_label_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
             os.path.expanduser(label_paths)) for f in fn if ".label" in f]
@@ -168,7 +169,8 @@ if __name__ == '__main__':
         label_names.extend(seq_label_names)
 
         if FLAGS.radius != -1:
-            lidar_paths = os.path.join(FLAGS.dataset, "sequences", str(sequence), "velodyne")
+            lidar_paths = os.path.join(
+                FLAGS.dataset, "sequences", str(sequence), "velodyne")
             seq_lidar_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
                 os.path.expanduser(lidar_paths)) for f in fn if ".bin" in f]
             seq_lidar_names.sort()
@@ -180,7 +182,8 @@ if __name__ == '__main__':
     pred_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        pred_paths = os.path.join(FLAGS.predictions, "sequences", sequence, "predictions")
+        pred_paths = os.path.join(
+            FLAGS.predictions, "sequences", sequence, "predictions")
         # populate the label names
         seq_pred_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
             os.path.expanduser(pred_paths)) for f in fn if ".label" in f]
@@ -195,7 +198,8 @@ if __name__ == '__main__':
     assert(len(label_names) == len(pred_names))
     if FLAGS.radius != -1:
         print("lidars: ", len(lidar_names))
-        print(f"\033[32m Only use the points in radius <= {FLAGS.radius}m. \033[0m")
+        print(
+            f"\033[32m Only use the points in radius <= {FLAGS.radius}m. \033[0m")
 
     # open each file, get the tensor, and make the iou comparison
     # for lidar_file, label_file, pred_file in zip(lidar_names[:], label_names[:], pred_names[:]):
@@ -205,9 +209,10 @@ if __name__ == '__main__':
         frame_evaluator.reset()
 
         if FLAGS.radius != -1:
-            pc_xyz = np.fromfile(lidar_names[f_id], dtype=np.float32).reshape((-1, 4))[:, :3]
+            pc_xyz = np.fromfile(
+                lidar_names[f_id], dtype=np.float32).reshape((-1, 4))[:, :3]
             depth = np.linalg.norm(pc_xyz, 2, axis=1)
-            
+
             radius_mask = np.ones((pc_xyz.shape[0]), dtype=bool)
             if FLAGS.radius > 0:
                 radius_mask = np.logical_and(depth <= FLAGS.radius, depth >= 2)
@@ -233,7 +238,7 @@ if __name__ == '__main__':
             pred = pred[radius_mask]
             label = label[radius_mask]
 
-        evaluator.addBatch(pred, label) # shape: (n, ) (n, ), type: int32
+        evaluator.addBatch(pred, label)  # shape: (n, ) (n, ), type: int32
         # m_jaccard, class_jaccard = evaluator.getIoU()
         # frame_evaluator.addBatch(pred, label)
         # m_jaccard, class_jaccard = frame_evaluator.getIoU()
@@ -250,7 +255,8 @@ if __name__ == '__main__':
     print("below can be copied straight for paper table")
     for i, jacc in enumerate(class_jaccard):
         if i not in ignore:
-            sys.stdout.write('{}: {jacc:.6f}\n'.format(class_strings[class_inv_remap[i]], jacc=jacc.item()))
+            sys.stdout.write('{}: {jacc:.6f}\n'.format(
+                class_strings[class_inv_remap[i]], jacc=jacc.item()))
             # for mos
             # if int(class_inv_remap[i]) == 9:
             #     sys.stdout.write('iou_static: {jacc:.6f}\n'.format(jacc=jacc.item()))

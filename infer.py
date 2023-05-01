@@ -9,7 +9,7 @@ from modules.user_poss import *
 
 
 if __name__ == '__main__':
-    
+
     parser = get_args(flags="infer")
     FLAGS, unparsed = parser.parse_known_args()
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     ARCH = load_yaml(FLAGS.model + "/arch_cfg.yaml")
     DATA = load_yaml(FLAGS.model + "/data_cfg.yaml")
 
-    make_predictions_dir(FLAGS, DATA) # create predictions file folder
+    make_predictions_dir(FLAGS, DATA)  # create predictions file folder
     check_model_dir(FLAGS.model)      # does model folder exist?
 
     # create user and infer dataset
@@ -36,9 +36,9 @@ if __name__ == '__main__':
                         modeldir=FLAGS.model, split=FLAGS.split)
         elif DATA["name"] == "poss":
             user = UserPoss(ARCH, DATA, datadir=FLAGS.dataset, outputdir=FLAGS.log,
-                        modeldir=FLAGS.model, split=FLAGS.split)
+                            modeldir=FLAGS.model, split=FLAGS.split)
         else:
-           raise ValueError("unsupported dataset {}".format(DATA["name"])) 
+            raise ValueError("unsupported dataset {}".format(DATA["name"]))
     else:
         user = UserRefine(ARCH, DATA, datadir=FLAGS.dataset, outputdir=FLAGS.log,
                           modeldir=FLAGS.model, split=FLAGS.split)

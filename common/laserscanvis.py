@@ -42,7 +42,7 @@ class LaserScanVis:
 
         # laserscan part
         self.scan_view = vispy.scene.widgets.ViewBox(
-                border_color='white', parent=self.canvas.scene)
+            border_color='white', parent=self.canvas.scene)
         self.grid.add_widget(self.scan_view, 0, 0)
         self.scan_vis = visuals.Markers()
         self.scan_view.camera = 'turntable'
@@ -53,7 +53,7 @@ class LaserScanVis:
         if self.semantics:
             print("Using semantics in visualizer")
             self.sem_view = vispy.scene.widgets.ViewBox(
-                    border_color='white', parent=self.canvas.scene)
+                border_color='white', parent=self.canvas.scene)
             self.grid.add_widget(self.sem_view, 0, 1)
             self.sem_vis = visuals.Markers()
             self.sem_view.camera = 'turntable'
@@ -64,7 +64,7 @@ class LaserScanVis:
         if self.instances:
             print("Using instances in visualizer")
             self.inst_view = vispy.scene.widgets.ViewBox(
-                    border_color='white', parent=self.canvas.scene)
+                border_color='white', parent=self.canvas.scene)
             self.grid.add_widget(self.inst_view, 0, 2)
             self.inst_vis = visuals.Markers()
             self.inst_view.camera = 'turntable'
@@ -132,7 +132,8 @@ class LaserScanVis:
             self.scan.colorize()
 
         # then change names
-        title = "scan " + str(self.offset) + " of " + str(len(self.scan_names)-1)
+        title = "scan " + str(self.offset) + " of " + \
+            str(len(self.scan_names)-1)
         self.canvas.title = title
         self.img_canvas.title = title
 
@@ -176,7 +177,7 @@ class LaserScanVis:
         data[data < 0] = data[data > 0].min()
         # print(data.max(), data.min())
         data = (data - data[data > 0].min()) / \
-                (data.max() - data[data > 0].min())
+            (data.max() - data[data > 0].min())
         # print(data.max(), data.min())
         self.img_vis.set_data(data)
         self.img_vis.update()

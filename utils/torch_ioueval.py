@@ -13,7 +13,8 @@ class iouEval:
 
         # What to include and ignore from the means
         self.ignore = torch.tensor(ignore).long()
-        self.include = torch.tensor([n for n in range(self.n_classes) if n not in self.ignore]).long()
+        self.include = torch.tensor(
+            [n for n in range(self.n_classes) if n not in self.ignore]).long()
         print("[IOU EVAL] IGNORE: ", self.ignore)
         print("[IOU EVAL] INCLUDE: ", self.include)
 
@@ -29,7 +30,8 @@ class iouEval:
         return self.n_classes
 
     def reset(self):
-        self.conf_matrix = torch.zeros((self.n_classes, self.n_classes), device=self.device).long()
+        self.conf_matrix = torch.zeros(
+            (self.n_classes, self.n_classes), device=self.device).long()
 
     def addBatch(self, x, y):  # x=preds, y=targets
         # to tensor
@@ -50,7 +52,8 @@ class iouEval:
         ones = torch.ones((idxs.shape[-1]), device=self.device).long()
 
         # make confusion matrix (cols = gt, rows = pred)
-        self.conf_matrix = self.conf_matrix.index_put_(tuple(idxs), ones, accumulate=True)
+        self.conf_matrix = self.conf_matrix.index_put_(
+            tuple(idxs), ones, accumulate=True)
 
     def getStats(self):
         # remove fp from confusion on the ignore classes cols

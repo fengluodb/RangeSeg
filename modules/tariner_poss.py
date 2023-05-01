@@ -20,7 +20,8 @@ from modules.utils import AverageMeter, iouEval, save_checkpoint, show_scans_in_
 
 class TrainerPoss(Trainer):
     def __init__(self, ARCH, DATA, datadir, logdir, path=None):
-        super(TrainerPoss, self).__init__(ARCH, DATA, datadir, logdir, path, point_refine=False)
+        super(TrainerPoss, self).__init__(ARCH, DATA,
+                                          datadir, logdir, path, point_refine=False)
 
         # get the data
         self.parser = Parser(root=self.datadir,
@@ -41,7 +42,6 @@ class TrainerPoss(Trainer):
     def train_epoch(self, train_loader, model, criterion, optimizer,
                     epoch, evaluator, scheduler, color_fn, report=10,
                     show_scans=False):
-
 
         losses = AverageMeter()
         acc = AverageMeter()
@@ -71,25 +71,34 @@ class TrainerPoss(Trainer):
             if self.ARCH["train"]["aux_loss"]["use"]:
                 [output, z2, z4, z8] = model(in_vol)
                 lamda = self.ARCH["train"]["aux_loss"]["lamda"]
-                bdlosss = self.bd(output, proj_labels.long()) + lamda[0]*self.bd(z2, proj_labels.long()) + lamda[1]*self.bd(z4, proj_labels.long()) + lamda[2]*self.bd(z8, proj_labels.long())
-                loss_m0 = criterion(torch.log(output.clamp(min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(output, proj_labels.long())
-                loss_m2 = criterion(torch.log(z2.clamp(min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z2, proj_labels.long())
-                loss_m4 = criterion(torch.log(z4.clamp(min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z4, proj_labels.long())
-                loss_m8 = criterion(torch.log(z8.clamp(min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z8, proj_labels.long())
-                loss_m = loss_m0 + lamda[0]*loss_m2 + lamda[1]*loss_m4 + lamda[2]*loss_m8 + bdlosss
+                bdlosss = self.bd(output, proj_labels.long()) + lamda[0]*self.bd(z2, proj_labels.long(
+                )) + lamda[1]*self.bd(z4, proj_labels.long()) + lamda[2]*self.bd(z8, proj_labels.long())
+                loss_m0 = criterion(torch.log(output.clamp(
+                    min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(output, proj_labels.long())
+                loss_m2 = criterion(torch.log(z2.clamp(
+                    min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z2, proj_labels.long())
+                loss_m4 = criterion(torch.log(z4.clamp(
+                    min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z4, proj_labels.long())
+                loss_m8 = criterion(torch.log(z8.clamp(
+                    min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z8, proj_labels.long())
+                loss_m = loss_m0 + lamda[0]*loss_m2 + \
+                    lamda[1]*loss_m4 + lamda[2]*loss_m8 + bdlosss
             else:
                 output, _ = model(in_vol)
                 bdlosss = self.bd(output, proj_labels.long())
-                loss_m = criterion(torch.log(output.clamp(min=1e-8)).double(), proj_labels).float() + self.ls(output, proj_labels.long()) + bdlosss
+                loss_m = criterion(torch.log(output.clamp(
+                    min=1e-8)).double(), proj_labels).float() + self.ls(output, proj_labels.long()) + bdlosss
 
             optimizer.zero_grad()
             if self.n_gpus > 1:
                 idx = torch.ones(self.n_gpus).cuda()
                 loss_m.backward(idx)
-                nn.utils.clip_grad.clip_grad_norm_(self.model.parameters(), max_norm=1, norm_type=2)
+                nn.utils.clip_grad.clip_grad_norm_(
+                    self.model.parameters(), max_norm=1, norm_type=2)
             else:
                 loss_m.backward()
-                nn.utils.clip_grad.clip_grad_norm_(self.model.parameters(), max_norm=1, norm_type=2)
+                nn.utils.clip_grad.clip_grad_norm_(
+                    self.model.parameters(), max_norm=1, norm_type=2)
             optimizer.step()
 
             # measure accuracy and record loss
@@ -118,8 +127,10 @@ class TrainerPoss(Trainer):
                 lr = g["lr"]
                 for value in g["params"]:
                     if value.grad is not None:
-                        w = np.linalg.norm(value.data.cpu().numpy().reshape((-1)))
-                        update = np.linalg.norm(-max(lr, 1e-10) * value.grad.cpu().numpy().reshape((-1)))
+                        w = np.linalg.norm(
+                            value.data.cpu().numpy().reshape((-1)))
+                        update = np.linalg.norm(-max(lr, 1e-10)
+                                                * value.grad.cpu().numpy().reshape((-1)))
                         update_ratios.append(update / max(w, 1e-10))
             update_ratios = np.array(update_ratios)
             update_mean = update_ratios.mean()
@@ -127,17 +138,17 @@ class TrainerPoss(Trainer):
             update_ratio_meter.update(update_mean)  # over the epoch
 
             if show_scans:
-                    # get the first scan in batch and project points
-                    depth_np = in_vol[0][0].cpu().numpy()
-                    pred_np = argmax[0].cpu().numpy()
-                    gt_np = proj_labels[0].cpu().numpy()
-                    out = self.make_log_img(depth_np, pred_np, gt_np, color_fn)
+                # get the first scan in batch and project points
+                depth_np = in_vol[0][0].cpu().numpy()
+                pred_np = argmax[0].cpu().numpy()
+                gt_np = proj_labels[0].cpu().numpy()
+                out = self.make_log_img(depth_np, pred_np, gt_np, color_fn)
 
-                    directory = os.path.join(self.log, "train-predictions")
-                    if not os.path.isdir(directory):
-                        os.makedirs(directory)
-                    name = os.path.join(directory, str(i) + ".png")
-                    cv2.imwrite(name, out)
+                directory = os.path.join(self.log, "train-predictions")
+                if not os.path.isdir(directory):
+                    os.makedirs(directory)
+                name = os.path.join(directory, str(i) + ".png")
+                cv2.imwrite(name, out)
 
             if i % self.ARCH["train"]["report_batch"] == 0:
                 str_line = ('Lr: {lr:.3e} | '
@@ -203,8 +214,8 @@ class TrainerPoss(Trainer):
                 evaluator.addBatch(argmax, proj_labels)
 
                 losses.update(loss.mean().item(), in_vol.size(0))
-                jaccs.update(jacc.mean().item(),in_vol.size(0))
-                wces.update(wce.mean().item(),in_vol.size(0))
+                jaccs.update(jacc.mean().item(), in_vol.size(0))
+                wces.update(wce.mean().item(), in_vol.size(0))
 
                 if save_scans:
                     # get the first scan in batch and project points

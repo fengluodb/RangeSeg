@@ -8,11 +8,14 @@ class CosineAnnealingWarmUpRestarts(_LRScheduler):
         self, optimizer, T_0, T_mult=1, eta_max=0.1, T_up=0, gamma=1.0, last_epoch=-1
     ):
         if T_0 <= 0 or not isinstance(T_0, int):
-            raise ValueError("Expected positive integer T_0, but got {}".format(T_0))
+            raise ValueError(
+                "Expected positive integer T_0, but got {}".format(T_0))
         if T_mult < 1 or not isinstance(T_mult, int):
-            raise ValueError("Expected integer T_mult >= 1, but got {}".format(T_mult))
+            raise ValueError(
+                "Expected integer T_mult >= 1, but got {}".format(T_mult))
         if T_up < 0 or not isinstance(T_up, int):
-            raise ValueError("Expected positive integer T_up, but got {}".format(T_up))
+            raise ValueError(
+                "Expected positive integer T_up, but got {}".format(T_up))
         self.T_0 = T_0
         self.T_mult = T_mult
         self.base_eta_max = eta_max
@@ -22,7 +25,8 @@ class CosineAnnealingWarmUpRestarts(_LRScheduler):
         self.gamma = gamma
         self.cycle = 0
         self.T_cur = last_epoch
-        super(CosineAnnealingWarmUpRestarts, self).__init__(optimizer, last_epoch)
+        super(CosineAnnealingWarmUpRestarts, self).__init__(
+            optimizer, last_epoch)
 
     def get_lr(self):
         if self.T_cur == -1:
@@ -39,7 +43,8 @@ class CosineAnnealingWarmUpRestarts(_LRScheduler):
                 * (
                     1
                     + math.cos(
-                        math.pi * (self.T_cur - self.T_up) / (self.T_i - self.T_up)
+                        math.pi * (self.T_cur - self.T_up) /
+                        (self.T_i - self.T_up)
                     )
                 )
                 / 2

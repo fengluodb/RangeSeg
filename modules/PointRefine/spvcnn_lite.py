@@ -92,7 +92,8 @@ def voxel_to_point(x, z, nearest=False):
         z.weights[x.s] = weights
 
     else:
-        new_feat = F.spdevoxelize(x.F, z.idx_query.get(x.s), z.weights.get(x.s))
+        new_feat = F.spdevoxelize(
+            x.F, z.idx_query.get(x.s), z.weights.get(x.s))
         new_tensor = PointTensor(new_feat,
                                  z.C,
                                  idx_query=z.idx_query,
@@ -208,7 +209,8 @@ class SPVCNN(nn.Module):
         self.up1 = nn.ModuleList([
             BasicDeconvolutionBlock(cs[2], cs[3], ks=2, stride=2),
             nn.Sequential(
-                ResidualBlock(cs[3] + cs[1], cs[3], ks=3, stride=1, dilation=1),
+                ResidualBlock(cs[3] + cs[1], cs[3], ks=3,
+                              stride=1, dilation=1),
                 ResidualBlock(cs[3], cs[3], ks=3, stride=1, dilation=1),
             )
         ])
@@ -216,12 +218,14 @@ class SPVCNN(nn.Module):
         self.up2 = nn.ModuleList([
             BasicDeconvolutionBlock(cs[3], cs[4], ks=2, stride=2),
             nn.Sequential(
-                ResidualBlock(cs[4] + cs[0], cs[4], ks=3, stride=1, dilation=1),
+                ResidualBlock(cs[4] + cs[0], cs[4], ks=3,
+                              stride=1, dilation=1),
                 ResidualBlock(cs[4], cs[4], ks=3, stride=1, dilation=1),
             )
         ])
 
-        self.classifier = nn.Sequential(nn.Linear(cs[4], kwargs['num_classes']))
+        self.classifier = nn.Sequential(
+            nn.Linear(cs[4], kwargs['num_classes']))
 
         self.point_transforms = nn.ModuleList([
             nn.Sequential(
@@ -244,7 +248,6 @@ class SPVCNN(nn.Module):
             if isinstance(m, nn.BatchNorm1d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-
 
     def forward(self, x):
         # x: SparseTensor z: PointTensor

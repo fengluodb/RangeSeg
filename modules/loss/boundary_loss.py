@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import cv2
 import numpy as np
+
+
 def one_hot(label, n_classes, requires_grad=True):
     """Return One Hot Label"""
     divce = label.device
@@ -49,7 +51,6 @@ class BoundaryLoss(nn.Module):
             1 - one_hot_gt, kernel_size=self.theta0, stride=1, padding=(self.theta0 - 1) // 2)
         gt_b -= 1 - one_hot_gt
 
-
         pred_b = F.max_pool2d(
             1 - pred, kernel_size=self.theta0, stride=1, padding=(self.theta0 - 1) // 2)
         pred_b -= 1 - pred
@@ -59,12 +60,11 @@ class BoundaryLoss(nn.Module):
         #     gt_bv = gt_b.detach().cpu().numpy()
         #     # cv2.imshow('gt_b_cls.png'.format(i), gt_bv[0][i])
         #     cv2.imwrite('gt_b_cls{}.png'.format(i), gt_bv[0][i]*255)
-        # 
+        #
         #     pred_bv = pred_b.detach().cpu().numpy()
         #     #cv2.imshow('pred_b_cls{}'.format(i), pred_bv[0][i])
         #     cv2.imwrite('pred_b_cls{}.png'.format(i), pred_bv[0][i]*255)
 
-        
         # reshape
 #         gt_b = gt_b[:, 1:, :, :]
 #         pred_b = pred_b[:, 1:, :, :]
@@ -84,6 +84,3 @@ class BoundaryLoss(nn.Module):
         loss = torch.mean(1 - BF1)
 
         return loss
-
-
-

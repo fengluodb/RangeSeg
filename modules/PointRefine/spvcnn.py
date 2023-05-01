@@ -92,7 +92,8 @@ def voxel_to_point(x, z, nearest=False):
         z.weights[x.s] = weights
 
     else:
-        new_feat = F.spdevoxelize(x.F, z.idx_query.get(x.s), z.weights.get(x.s))
+        new_feat = F.spdevoxelize(
+            x.F, z.idx_query.get(x.s), z.weights.get(x.s))
         new_tensor = PointTensor(new_feat,
                                  z.C,
                                  idx_query=z.idx_query,
@@ -219,7 +220,8 @@ class SPVCNN(nn.Module):
         self.up1 = nn.ModuleList([
             BasicDeconvolutionBlock(cs[4], cs[5], ks=2, stride=2),
             nn.Sequential(
-                ResidualBlock(cs[5] + cs[3], cs[5], ks=3, stride=1, dilation=1),
+                ResidualBlock(cs[5] + cs[3], cs[5], ks=3,
+                              stride=1, dilation=1),
                 ResidualBlock(cs[5], cs[5], ks=3, stride=1, dilation=1),
             )
         ])
@@ -227,7 +229,8 @@ class SPVCNN(nn.Module):
         self.up2 = nn.ModuleList([
             BasicDeconvolutionBlock(cs[5], cs[6], ks=2, stride=2),
             nn.Sequential(
-                ResidualBlock(cs[6] + cs[2], cs[6], ks=3, stride=1, dilation=1),
+                ResidualBlock(cs[6] + cs[2], cs[6], ks=3,
+                              stride=1, dilation=1),
                 ResidualBlock(cs[6], cs[6], ks=3, stride=1, dilation=1),
             )
         ])
@@ -235,7 +238,8 @@ class SPVCNN(nn.Module):
         self.up3 = nn.ModuleList([
             BasicDeconvolutionBlock(cs[6], cs[7], ks=2, stride=2),
             nn.Sequential(
-                ResidualBlock(cs[7] + cs[1], cs[7], ks=3, stride=1, dilation=1),
+                ResidualBlock(cs[7] + cs[1], cs[7], ks=3,
+                              stride=1, dilation=1),
                 ResidualBlock(cs[7], cs[7], ks=3, stride=1, dilation=1),
             )
         ])
@@ -243,12 +247,14 @@ class SPVCNN(nn.Module):
         self.up4 = nn.ModuleList([
             BasicDeconvolutionBlock(cs[7], cs[8], ks=2, stride=2),
             nn.Sequential(
-                ResidualBlock(cs[8] + cs[0], cs[8], ks=3, stride=1, dilation=1),
+                ResidualBlock(cs[8] + cs[0], cs[8], ks=3,
+                              stride=1, dilation=1),
                 ResidualBlock(cs[8], cs[8], ks=3, stride=1, dilation=1),
             )
         ])
 
-        self.classifier = nn.Sequential(nn.Linear(cs[8], kwargs['num_classes']))
+        self.classifier = nn.Sequential(
+            nn.Linear(cs[8], kwargs['num_classes']))
 
         self.point_transforms = nn.ModuleList([
             nn.Sequential(

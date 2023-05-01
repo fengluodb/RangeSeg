@@ -22,7 +22,7 @@ def get_gaussian_kernel(kernel_size=3, sigma=2, channels=1):
     # the product of two gaussian distributions for two different
     # variables (in this case called x and y)
     gaussian_kernel = (1. / (2. * math.pi * variance)) * \
-                      torch.exp(-torch.sum((xy_grid - mean) ** 2., dim=-1) / (2 * variance))
+        torch.exp(-torch.sum((xy_grid - mean) ** 2., dim=-1) / (2 * variance))
 
     # Make sure sum of values in gaussian kernel equals 1.
     gaussian_kernel = gaussian_kernel / torch.sum(gaussian_kernel)
@@ -100,7 +100,7 @@ class KNN(nn.Module):
         # I make this 1 - kernel because I want distances that are close in (x,y)
         # to matter more
         inv_gauss_k = (
-                1 - get_gaussian_kernel(self.search, self.sigma, 1)).view(1, -1, 1)
+            1 - get_gaussian_kernel(self.search, self.sigma, 1)).view(1, -1, 1)
         inv_gauss_k = inv_gauss_k.to(device).type(proj_range.type())
 
         # apply weighing
@@ -122,7 +122,8 @@ class KNN(nn.Module):
 
         # fake an invalid argmax of classes + 1 for all cutoff items
         if self.cutoff > 0:
-            knn_distances = torch.gather(input=k2_distances, dim=1, index=knn_idx)
+            knn_distances = torch.gather(
+                input=k2_distances, dim=1, index=knn_idx)
             knn_invalid_idx = knn_distances > self.cutoff
             knn_argmax[knn_invalid_idx] = self.nclasses
 

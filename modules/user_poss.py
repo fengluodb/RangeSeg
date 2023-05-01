@@ -16,6 +16,7 @@ from tqdm import tqdm
 from modules.user import User
 from dataset.poss.parser import Parser
 
+
 class UserPoss(User):
     def __init__(self, ARCH, DATA, datadir, outputdir, modeldir, split, point_refine=False):
         super().__init__(ARCH, DATA, datadir, outputdir, modeldir, split, point_refine)
@@ -35,7 +36,6 @@ class UserPoss(User):
                              gt=True,
                              shuffle_train=False)
 
-    
     def infer_subset(self, loader, to_orig_fn, cnn, knn):
 
         # switch to evaluate mode
@@ -52,9 +52,9 @@ class UserPoss(User):
             proj_y = torch.full([40, 1800], 0, dtype=torch.long)
             proj_x = torch.full([40, 1800], 0, dtype=torch.long)
             for i in range(proj_y.size(0)):
-              proj_y[i, :] = i
+                proj_y[i, :] = i
             for i in range(proj_x.size(1)):
-              proj_x[:, i] = i
+                proj_x[:, i] = i
 
             proj_y = proj_y.reshape([40 * 1800])
             proj_x = proj_x.reshape([40 * 1800])
@@ -73,7 +73,7 @@ class UserPoss(User):
                     if self.post:
                         proj_range = proj_range[0].cuda()
                         unproj_range = unproj_range[0].cuda()
-                
+
                 end = time.time()
                 # compute output
                 if self.ARCH["train"]["aux_loss"]["use"]:
@@ -112,5 +112,6 @@ class UserPoss(User):
                 # map to original label
                 pred_np = to_orig_fn(pred_np)
 
-                path = os.path.join(self.outputdir, "sequences", path_seq, "predictions", path_name)
+                path = os.path.join(self.outputdir, "sequences",
+                                    path_seq, "predictions", path_name)
                 pred_np.tofile(path)

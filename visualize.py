@@ -83,22 +83,24 @@ if __name__ == '__main__':
         from common.posslaserscan import LaserScan, SemLaserScan
         from common.posslaserscanvis import LaserScanVis
     else:
-        raise TypeError("This type dataset doesn't exist (use kitti or poss)! Exiting...")
+        raise TypeError(
+            "This type dataset doesn't exist (use kitti or poss)! Exiting...")
 
     # open config file
     try:
         if FLAGS.what == "kitti":
             print("Opening config file of KITTI")
-            CFG = yaml.safe_load(open('config/labels/semantic-kitti.yaml', 'r'))
+            CFG = yaml.safe_load(
+                open('config/labels/semantic-kitti.yaml', 'r'))
         elif FLAGS.what == "poss":
             print("Opening config file of POSS")
             CFG = yaml.safe_load(open('config/labels/semantic-poss.yaml', 'r'))
         else:
-            raise TypeError("This type dataset doesn't exist (use kitti or poss)! Exiting...")
+            raise TypeError(
+                "This type dataset doesn't exist (use kitti or poss)! Exiting...")
 
     except Exception as e:
         raise TypeError("Error opening yaml file.")
-
 
     # fix sequence name
     FLAGS.sequence = '{0:02d}'.format(int(FLAGS.sequence))
@@ -110,7 +112,8 @@ if __name__ == '__main__':
     if os.path.isdir(scan_paths):
         print("Sequence folder exists! Using sequence from %s" % scan_paths)
     else:
-        raise TypeError("Sequence folder doesn't exist from %s! Exiting..." % scan_paths)
+        raise TypeError(
+            "Sequence folder doesn't exist from %s! Exiting..." % scan_paths)
 
     # populate the pointclouds
     scan_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
@@ -124,7 +127,6 @@ if __name__ == '__main__':
             os.path.expanduser(tag_paths)) for f in fn]
         tag_names.sort()
 
-
     # does sequence folder exist?
     if not FLAGS.ignore_semantics:
         if FLAGS.predictions is not None:
@@ -136,7 +138,8 @@ if __name__ == '__main__':
         if os.path.isdir(label_paths):
             print("Labels folder exists! Using labels from %s" % label_paths)
         else:
-            raise TypeError("Labels folder doesn't exist from %s ! Exiting..." % label_paths)
+            raise TypeError(
+                "Labels folder doesn't exist from %s ! Exiting..." % label_paths)
 
         # populate the pointclouds
         label_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
@@ -149,7 +152,8 @@ if __name__ == '__main__':
 
     # create a scan
     if FLAGS.ignore_semantics:
-        scan = LaserScan(project=True)  # project all opened scans to spheric proj
+        # project all opened scans to spheric proj
+        scan = LaserScan(project=True)
     else:
         color_dict = CFG["color_map"]
         scan = SemLaserScan(color_dict, project=True)
@@ -160,11 +164,11 @@ if __name__ == '__main__':
         label_names = None
     if FLAGS.what == "kitti":
         vis = LaserScanVis(scan=scan,
-                       scan_names=scan_names,
-                       label_names=label_names,
-                       offset=FLAGS.offset,
-                       semantics=semantics,
-                       instances=False)
+                           scan_names=scan_names,
+                           label_names=label_names,
+                           offset=FLAGS.offset,
+                           semantics=semantics,
+                           instances=False)
     elif FLAGS.what == "poss":
         vis = LaserScanVis(scan=scan,
                            scan_names=scan_names,

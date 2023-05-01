@@ -12,7 +12,8 @@ class iouEval:
 
         # What to include and ignore from the means
         self.ignore = np.array(ignore, dtype=np.int64)
-        self.include = np.array([n for n in range(self.n_classes) if n not in self.ignore], dtype=np.int64)
+        self.include = np.array(
+            [n for n in range(self.n_classes) if n not in self.ignore], dtype=np.int64)
         print("[IOU EVAL] IGNORE: ", self.ignore)
         print("[IOU EVAL] INCLUDE: ", self.include)
 
@@ -23,7 +24,8 @@ class iouEval:
         return self.n_classes
 
     def reset(self):
-        self.conf_matrix = np.zeros((self.n_classes, self.n_classes), dtype=np.int64)
+        self.conf_matrix = np.zeros(
+            (self.n_classes, self.n_classes), dtype=np.int64)
 
     def addBatch(self, x, y):  # x=preds, y=targets
         # sizes should be matching
@@ -64,10 +66,9 @@ class iouEval:
         total = tp[self.include].sum() + fp[self.include].sum() + 1e-15
         acc_mean = total_tp / total
         return acc_mean  # returns "acc mean"
-        
+
     def get_confusion(self):
         return self.conf_matrix.copy()
-
 
 
 if __name__ == "__main__":
@@ -78,7 +79,7 @@ if __name__ == "__main__":
     # test with 2 squares and a known IOU
     lbl = np.zeros((7, 7), dtype=np.int64)
     argmax = np.zeros((7, 7), dtype=np.int64)
-    
+
     eval = iouEval(nclasses, ignore)
 
     eval.addBatch(argmax, lbl)

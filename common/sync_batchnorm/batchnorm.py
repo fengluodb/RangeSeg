@@ -76,7 +76,7 @@ class _SynchronizedBatchNorm(_BatchNorm):
         if self.affine:
             # MJY:: Fuse the multiplication for speed.
             output = (input - _unsqueeze_ft(mean)) * \
-                     _unsqueeze_ft(inv_std * self.weight) + _unsqueeze_ft(self.bias)
+                _unsqueeze_ft(inv_std * self.weight) + _unsqueeze_ft(self.bias)
         else:
             output = (input - _unsqueeze_ft(mean)) * _unsqueeze_ft(inv_std)
 
@@ -98,7 +98,8 @@ class _SynchronizedBatchNorm(_BatchNorm):
 
         # Always using same "device order" makes the ReduceAdd operation faster.
         # Thanks to:: Tete Xiao (http://tetexiao.com/)
-        intermediates = sorted(intermediates, key=lambda i: i[1].sum.get_device())
+        intermediates = sorted(
+            intermediates, key=lambda i: i[1].sum.get_device())
 
         to_reduce = [i[1][:2] for i in intermediates]
         to_reduce = [j for i in to_reduce for j in i]  # flatten
@@ -112,7 +113,8 @@ class _SynchronizedBatchNorm(_BatchNorm):
 
         outputs = []
         for i, rec in enumerate(intermediates):
-            outputs.append((rec[0], _MasterMessage(*broadcasted[i * 2:i * 2 + 2])))
+            outputs.append((rec[0], _MasterMessage(
+                *broadcasted[i * 2:i * 2 + 2])))
 
         return outputs
 
@@ -126,9 +128,9 @@ class _SynchronizedBatchNorm(_BatchNorm):
         bias_var = sumvar / size
 
         self.running_mean = (1 - self.momentum) * \
-                            self.running_mean + self.momentum * mean.data
+            self.running_mean + self.momentum * mean.data
         self.running_var = (1 - self.momentum) * \
-                           self.running_var + self.momentum * unbias_var.data
+            self.running_var + self.momentum * unbias_var.data
 
         return mean, bias_var.clamp(self.eps) ** -0.5
 

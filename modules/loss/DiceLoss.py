@@ -6,23 +6,23 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-#PyTorch
+# PyTorch
 # class DiceLoss(nn.Module):
 #     def __init__(self, weight=None, size_average=True):
 #         super(DiceLoss, self).__init__()
 
 #     def forward(self, inputs, targets, smooth=1):
-        
+
 #         #comment out if your model contains a sigmoid or equivalent activation layer
-#         inputs = F.sigmoid(inputs)       
-        
+#         inputs = F.sigmoid(inputs)
+
 #         #flatten label and prediction tensors
 #         inputs = inputs.view(-1)
 #         targets = targets.view(-1)
-        
-#         intersection = (inputs * targets).sum()                            
-#         dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
-        
+
+#         intersection = (inputs * targets).sum()
+#         dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)
+
 #         return 1 - dice
 
 # https://smp.readthedocs.io/en/latest/losses.html
@@ -94,14 +94,15 @@ class DiceLoss(nn.Module):
         # create the labels one hot tensor
         # target_one_hot = one_hot(target, num_classes=input.shape[1],
         #                          device=input.device, dtype=input.dtype)
-        target_one_hot = F.one_hot(target, num_classes=input.shape[1]).permute(0, 3, 1, 2)
+        target_one_hot = F.one_hot(
+            target, num_classes=input.shape[1]).permute(0, 3, 1, 2)
 
         # compute the actual dice score
         dims = (1, 2, 3)
         # intersection = torch.sum(input_soft * target_one_hot, dims)
         # cardinality = torch.sum(input_soft + target_one_hot, dims)
 
-        ## if we need to ignore the class=0
+        # if we need to ignore the class=0
         input_filter = input[:, 1:, :, :]
         target_one_hot_filter = input[:, 1:, :, :]
         intersection = torch.sum(input_filter * target_one_hot_filter, dims)
@@ -109,7 +110,6 @@ class DiceLoss(nn.Module):
 
         dice_score = 2. * intersection / (cardinality + self.eps)
         return torch.mean(1. - dice_score)
-
 
 
 ######################
@@ -123,4 +123,3 @@ def dice_loss(input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     See :class:`~torchgeometry.losses.DiceLoss` for details.
     """
     return DiceLoss()(input, target)
-

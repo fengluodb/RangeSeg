@@ -7,11 +7,12 @@ import math
 import random
 from scipy.spatial.transform import Rotation as R
 
+
 class LaserScan:
     """Class that contains LaserScan with x,y,z,r"""
     EXTENSIONS_SCAN = ['.bin']
 
-    def __init__(self, project=False, H=40, W=1800, fov_up=7.0, fov_down=-16.0,DA=False,flip_sign=False,rot=False,drop_points=False):
+    def __init__(self, project=False, H=40, W=1800, fov_up=7.0, fov_down=-16.0, DA=False, flip_sign=False, rot=False, drop_points=False):
         self.project = project
         self.proj_H = H
         self.proj_W = W
@@ -26,7 +27,8 @@ class LaserScan:
     def reset(self):
         """ Reset scan members. """
         self.points = np.zeros((0, 3), dtype=np.float32)  # [m, 3]: x, y, z
-        self.remissions = np.zeros((0, 1), dtype=np.float32)  # [m ,1]: remission
+        self.remissions = np.zeros(
+            (0, 1), dtype=np.float32)  # [m ,1]: remission
         self.tags = np.full((self.proj_H*self.proj_W), False, dtype=np.bool)
 
         self.unproj_range = np.zeros((0, 1), dtype=np.float32)
@@ -34,18 +36,23 @@ class LaserScan:
 #         self.midrange = np.zeros((self.proj_H * self.proj_W), dtype=np.uint8)
 #         self.midremission = np.zeros((self.proj_H * self.proj_W), dtype=np.float32)
 #         self.midxyz = np.zeros((self.proj_H * self.proj_W, 3), dtype=np.float32)
-        
-        self.midrange = np.full((self.proj_H * self.proj_W), -1, dtype=np.float32)
-        self.midremission = np.full((self.proj_H * self.proj_W), -1, dtype=np.float32)
-        self.midxyz = np.full((self.proj_H * self.proj_W, 3), -1, dtype=np.float32)
+
+        self.midrange = np.full(
+            (self.proj_H * self.proj_W), -1, dtype=np.float32)
+        self.midremission = np.full(
+            (self.proj_H * self.proj_W), -1, dtype=np.float32)
+        self.midxyz = np.full(
+            (self.proj_H * self.proj_W, 3), -1, dtype=np.float32)
 
         # projected range image - [H,W] range (-1 is no data)
-        self.proj_range = np.full((self.proj_H, self.proj_W), -1, dtype=np.float32)
+        self.proj_range = np.full(
+            (self.proj_H, self.proj_W), -1, dtype=np.float32)
         # projected point cloud xyz - [H,W,3] xyz coord (-1 is no data)
-        self.proj_xyz = np.full((self.proj_H, self.proj_W, 3), -1, dtype=np.float32)
+        self.proj_xyz = np.full(
+            (self.proj_H, self.proj_W, 3), -1, dtype=np.float32)
         # projected remission - [H,W] intensity (-1 is no data)
-        self.proj_remission = np.full((self.proj_H, self.proj_W), -1, dtype=np.float32)
-
+        self.proj_remission = np.full(
+            (self.proj_H, self.proj_W), -1, dtype=np.float32)
 
     def size(self):
         """ Return the size of the point cloud. """
@@ -81,7 +88,8 @@ class LaserScan:
 
         if self.rot:
             euler_angle = np.random.normal(-45, 45, 1)[0]  # 40
-            r = np.array(R.from_euler('zyx', [[euler_angle, 0, 0]], degrees=True).as_matrix())
+            r = np.array(R.from_euler(
+                'zyx', [[euler_angle, 0, 0]], degrees=True).as_matrix())
             r_t = r.transpose()
             points = points.dot(r_t)
             points = np.squeeze(points)
@@ -128,7 +136,6 @@ class LaserScan:
         if self.project:
             self.do_range_projection()
 
-
     def do_range_projection(self):
         """ Project a pointcloud into a spherical projection image.projection.
             Function takes no arguments because it can be also called externally
@@ -142,26 +149,27 @@ class LaserScan:
 #         dis = dis.astype(np.uint8)
 
         dis = np.linalg.norm(self.points, 2, axis=1)
-    
+
         self.midremission[self.tags] = self.remissions
         self.midrange[self.tags] = dis
         self.midxyz[self.tags] = self.points
 
         self.unproj_range = np.copy(dis)
 
-        self.proj_remission = np.reshape(self.midremission, (self.proj_H, self.proj_W))
+        self.proj_remission = np.reshape(
+            self.midremission, (self.proj_H, self.proj_W))
         self.proj_range = np.reshape(self.midrange, (self.proj_H, self.proj_W))
         self.proj_xyz = np.reshape(self.midxyz, (self.proj_H, self.proj_W, 3))
         # get depth of all points
-
 
 
 class SemLaserScan(LaserScan):
     """Class that contains LaserScan with x,y,z,r,sem_label,sem_color_label,inst_label,inst_color_label"""
     EXTENSIONS_LABEL = ['.label']
 
-    def __init__(self, sem_color_dict=None, project=False, H=40, W=1800, fov_up=7.0, fov_down=-16.0, max_classes=300,DA=False,flip_sign=False,rot=False,drop_points=False):
-        super(SemLaserScan, self).__init__(project, H, W, fov_up, fov_down,DA=DA,flip_sign=flip_sign,rot=rot,drop_points=drop_points)
+    def __init__(self, sem_color_dict=None, project=False, H=40, W=1800, fov_up=7.0, fov_down=-16.0, max_classes=300, DA=False, flip_sign=False, rot=False, drop_points=False):
+        super(SemLaserScan, self).__init__(project, H, W, fov_up, fov_down,
+                                           DA=DA, flip_sign=flip_sign, rot=rot, drop_points=drop_points)
         self.reset()
 
         # make semantic colors
@@ -171,7 +179,8 @@ class SemLaserScan(LaserScan):
             for key, data in sem_color_dict.items():
                 if key + 1 > max_sem_key:
                     max_sem_key = key + 1
-            self.sem_color_lut = np.zeros((max_sem_key + 100, 3), dtype=np.float32)
+            self.sem_color_lut = np.zeros(
+                (max_sem_key + 100, 3), dtype=np.float32)
             for key, value in sem_color_dict.items():
                 self.sem_color_lut[key] = np.array(value, np.float32) / 255.0
         else:
@@ -183,16 +192,17 @@ class SemLaserScan(LaserScan):
             # force zero to a gray-ish color
             self.sem_color_lut[0] = np.full((3), 0.1)
 
-
     def reset(self):
         """ Reset scan members. """
         super(SemLaserScan, self).reset()
 
         # semantic labels
         self.sem_label = np.zeros((0, 1), dtype=np.int32)  # [m, 1]: label
-        self.sem_label_color = np.zeros((0, 3), dtype=np.float32)  # [m ,3]: color
+        self.sem_label_color = np.zeros(
+            (0, 3), dtype=np.float32)  # [m ,3]: color
 
-        self.midsemlabel = np.zeros((self.proj_H * self.proj_W), dtype=np.int32)
+        self.midsemlabel = np.zeros(
+            (self.proj_H * self.proj_W), dtype=np.int32)
 
         # projection color with semantic labels
         self.proj_sem_label = np.zeros((self.proj_H, self.proj_W),
@@ -235,7 +245,8 @@ class SemLaserScan(LaserScan):
         else:
             print("Points shape: ", self.points.shape)
             print("Label shape: ", label.shape)
-            raise ValueError("Scan and Label don't contain same number of points")
+            raise ValueError(
+                "Scan and Label don't contain same number of points")
         self.tags = tags
 
         if self.project:
@@ -252,11 +263,11 @@ class SemLaserScan(LaserScan):
         # mask = self.proj_idx >= 0
 
         self.midsemlabel[self.tags] = self.sem_label
-        self.proj_sem_label = np.reshape(self.midsemlabel, (self.proj_H, self.proj_W))
+        self.proj_sem_label = np.reshape(
+            self.midsemlabel, (self.proj_H, self.proj_W))
 
         self.proj_sem_color = self.sem_color_lut[self.proj_sem_label]
 
         # semantics
         # self.proj_sem_label[mask] = self.sem_label[self.proj_idx[mask]]
         # self.proj_sem_color[mask] = self.sem_color_lut[self.sem_label[self.proj_idx[mask]]]
-

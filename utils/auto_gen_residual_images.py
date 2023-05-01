@@ -4,15 +4,14 @@
 # This file is covered by the LICENSE file in the root of this project.
 # Brief: This script generates residual images
 
+from kitti_utils import load_poses, load_calib, load_files, load_vertex, range_projection
+from icecream import ic
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+import numpy as np
+import yaml
 import os
 os.environ["OMP_NUM_THREADS"] = "4"
-import yaml
-import numpy as np
-import matplotlib.pyplot as plt
-
-from tqdm import tqdm
-from icecream import ic
-from kitti_utils import load_poses, load_calib, load_files, load_vertex, range_projection
 
 
 def check_and_makedirs(dir_path):
@@ -76,9 +75,10 @@ def process_one_seq(config):
 
     # generate residual images for the whole sequence
     for frame_idx in tqdm(range(len(scan_paths))):
-        file_name = os.path.join(residual_image_folder, str(frame_idx).zfill(6))
+        file_name = os.path.join(
+            residual_image_folder, str(frame_idx).zfill(6))
         diff_image = np.full((range_image_params['height'], range_image_params['width']), 0,
-                       dtype=np.float32)  # [H,W] range (0 is no data)
+                             dtype=np.float32)  # [H,W] range (0 is no data)
 
         # for the first N frame we generate a dummy file
         if frame_idx < num_last_n:
@@ -95,21 +95,25 @@ def process_one_seq(config):
             # load last scan, transform into the current coord and generate a transformed last range image
             last_pose = poses[frame_idx - num_last_n]
             last_scan = load_vertex(scan_paths[frame_idx - num_last_n])
-            last_scan_transformed = np.linalg.inv(current_pose).dot(last_pose).dot(last_scan.T).T
+            last_scan_transformed = np.linalg.inv(
+                current_pose).dot(last_pose).dot(last_scan.T).T
             last_range_transformed = range_projection(last_scan_transformed.astype(np.float32),
-                                             range_image_params['height'], range_image_params['width'],
-                                             range_image_params['fov_up'], range_image_params['fov_down'],
-                                             range_image_params['max_range'], range_image_params['min_range'])[:, :, 3]
+                                                      range_image_params['height'], range_image_params['width'],
+                                                      range_image_params['fov_up'], range_image_params['fov_down'],
+                                                      range_image_params['max_range'], range_image_params['min_range'])[:, :, 3]
 
             # generate residual image
             valid_mask = (current_range > range_image_params['min_range']) & \
-                            (current_range < range_image_params['max_range']) & \
-                            (last_range_transformed > range_image_params['min_range']) & \
-                            (last_range_transformed < range_image_params['max_range'])
-            difference = np.abs(current_range[valid_mask] - last_range_transformed[valid_mask])
+                (current_range < range_image_params['max_range']) & \
+                (last_range_transformed > range_image_params['min_range']) & \
+                (last_range_transformed <
+                 range_image_params['max_range'])
+            difference = np.abs(
+                current_range[valid_mask] - last_range_transformed[valid_mask])
 
             if normalize:
-                difference = np.abs(current_range[valid_mask] - last_range_transformed[valid_mask]) / current_range[valid_mask]
+                difference = np.abs(
+                    current_range[valid_mask] - last_range_transformed[valid_mask]) / current_range[valid_mask]
 
             diff_image[valid_mask] = difference
 
@@ -127,7 +131,8 @@ def process_one_seq(config):
                 ax.set_axis_off()
                 fig.add_axes(ax)
                 ax.imshow(diff_image, vmin=0, vmax=1)
-                image_name = os.path.join(visualization_folder, str(frame_idx).zfill(6))
+                image_name = os.path.join(
+                    visualization_folder, str(frame_idx).zfill(6))
                 plt.savefig(image_name)
                 plt.close()
 
@@ -143,9 +148,9 @@ if __name__ == '__main__':
     config = load_yaml(config_filename)
 
     # used for kitti-raw and kitti-road
-    for seq in range(0, 10): # sequences id
+    for seq in range(0, 10):  # sequences id
 
-        for i in range(1,9): # residual_image_i
+        for i in range(1, 9):  # residual_image_i
 
             # Update the value in config to facilitate the iterative loop
             config['num_last_n'] = i

@@ -3,10 +3,12 @@ import torch
 from torch.nn import functional as F
 import numpy as np
 
+
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=dilation, groups=groups, bias=False, dilation=dilation)
+
 
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution"""
@@ -42,9 +44,11 @@ class BasicBlock(nn.Module):
         if self.if_BN:
             norm_layer = nn.BatchNorm2d
         if groups != 1 or base_width != 64:
-            raise ValueError('BasicBlock only supports groups=1 and base_width=64')
+            raise ValueError(
+                'BasicBlock only supports groups=1 and base_width=64')
         if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
+            raise NotImplementedError(
+                "Dilation > 1 not supported in BasicBlock")
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv3x3(inplanes, planes, stride)
         if self.if_BN:
@@ -134,9 +138,11 @@ class BasicBlock(nn.Module):
                  base_width=64, dilation=1, if_BN=None):
         super(BasicBlock, self).__init__()
         if groups != 1 or base_width != 64:
-            raise ValueError('BasicBlock only supports groups=1 and base_width=64')
+            raise ValueError(
+                'BasicBlock only supports groups=1 and base_width=64')
         if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
+            raise NotImplementedError(
+                "Dilation > 1 not supported in BasicBlock")
 
         self.downsample = downsample
 
@@ -149,7 +155,7 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             x = self.downsample(x)
 
-        out = self.conv(x) 
+        out = self.conv(x)
         out = out + self.dropout(self.attn(out))
 
         out += x
@@ -163,11 +169,11 @@ class ResNet_34(nn.Module):
         super(ResNet_34, self).__init__()
         self.nclasses = nclasses
 
-        ### mos modification
+        # mos modification
         if params['train']['residual']:
             self.input_size = 5 + params['train']['n_input_scans']
         else:
-            self.input_size = 5 
+            self.input_size = 5
 
         print("Depth of backbone input = ", self.input_size)
         ###
@@ -252,13 +258,16 @@ class ResNet_34(nn.Module):
 
         res_1 = self.decoder1(torch.cat((x, x_1), dim=1))
 
-        res_2 = F.interpolate(x_2, size=x.size()[2:], mode='bilinear', align_corners=True)
+        res_2 = F.interpolate(
+            x_2, size=x.size()[2:], mode='bilinear', align_corners=True)
         res_2 = self.decoder2(torch.cat((res_1, res_2), dim=1))
 
-        res_3 = F.interpolate(x_3, size=x.size()[2:], mode='bilinear', align_corners=True)
+        res_3 = F.interpolate(
+            x_3, size=x.size()[2:], mode='bilinear', align_corners=True)
         res_3 = self.decoder3(torch.cat((res_2, res_3), dim=1))
 
-        res_4 = F.interpolate(x_4, size=x.size()[2:], mode='bilinear', align_corners=True)
+        res_4 = F.interpolate(
+            x_4, size=x.size()[2:], mode='bilinear', align_corners=True)
         res_4 = self.decoder4(torch.cat((res_3, res_4), dim=1))
         res = [res_2, res_3, res_4]
 

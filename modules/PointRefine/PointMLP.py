@@ -1,5 +1,5 @@
 # A simple MLP network structure for point clouds,
-# 
+#
 # Added by Jiadai Sun
 
 import torch

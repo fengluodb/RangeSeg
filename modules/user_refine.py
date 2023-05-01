@@ -25,7 +25,8 @@ from torchsparse import SparseTensor
 class UserRefine(User):
     def __init__(self, ARCH, DATA, datadir, outputdir, modeldir, split):
 
-        super(UserRefine, self).__init__(ARCH, DATA, datadir, outputdir, modeldir, split, point_refine=True)
+        super(UserRefine, self).__init__(ARCH, DATA, datadir,
+                                         outputdir, modeldir, split, point_refine=True)
 
     def infer(self):
         coarse, reproj, refine = [], [], []
@@ -55,9 +56,12 @@ class UserRefine(User):
         else:
             raise NotImplementedError
 
-        print(f"Mean Coarse inference time:{'%.8f'%np.mean(coarse)}\t std:{'%.8f'%np.std(coarse)}")
-        print(f"Mean Reproject inference time:{'%.8f'%np.mean(reproj)}\t std:{'%.8f'%np.std(reproj)}")
-        print(f"Mean Refine inference time:{'%.8f'%np.mean(refine)}\t std:{'%.8f'%np.std(refine)}")
+        print(
+            f"Mean Coarse inference time:{'%.8f'%np.mean(coarse)}\t std:{'%.8f'%np.std(coarse)}")
+        print(
+            f"Mean Reproject inference time:{'%.8f'%np.mean(reproj)}\t std:{'%.8f'%np.std(reproj)}")
+        print(
+            f"Mean Refine inference time:{'%.8f'%np.mean(refine)}\t std:{'%.8f'%np.std(refine)}")
         print(f"Total Frames: {len(coarse)}")
         print("Finished Infering")
 
@@ -113,9 +117,11 @@ class UserRefine(User):
                 points_feature = last_feature[0, :, p_y, p_x]
                 coords = np.round(points_xyz[:, :3].cpu().numpy() / 0.05)
                 coords -= coords.min(0, keepdims=1)
-                coords, indices, inverse = sparse_quantize(coords, return_index=True, return_inverse=True)
+                coords, indices, inverse = sparse_quantize(
+                    coords, return_index=True, return_inverse=True)
                 coords = torch.tensor(coords, dtype=torch.int, device='cuda')
-                feats = points_feature.permute(1,0)[indices] #torch.tensor(, dtype=torch.float)
+                # torch.tensor(, dtype=torch.float)
+                feats = points_feature.permute(1, 0)[indices]
                 inputs = SparseTensor(coords=coords, feats=feats)
                 inputs = sparse_collate([inputs]).cuda()
                 """"""""""""""""""""""""
@@ -137,7 +143,7 @@ class UserRefine(User):
                 refine.append(res)
                 # print(f"RefineModule seq {path_seq} scan {path_name} in {res} sec")
 
-                predict = predict[inverse] #.permute(1,0)
+                predict = predict[inverse]  # .permute(1,0)
                 unproj_argmax = predict.argmax(dim=1)
 
                 # save scan # get the first scan in batch and project scan
@@ -147,5 +153,6 @@ class UserRefine(User):
                 # map to original label
                 pred_np = to_orig_fn(pred_np)
 
-                path = os.path.join(self.outputdir, "sequences", path_seq, "predictions", path_name)
+                path = os.path.join(self.outputdir, "sequences",
+                                    path_seq, "predictions", path_name)
                 pred_np.tofile(path)

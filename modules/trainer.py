@@ -96,11 +96,13 @@ class Trainer():
                 self.convert_relu_to_softplus(self.model, nn.SiLU())
             elif self.ARCH["train"]["act"] == "GELU":
                 self.convert_relu_to_softplus(self.model, nn.GELU())
-        
+
         save_to_txtlog(self.logdir, 'model.txt', str(self.model))
-        pytorch_total_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        pytorch_total_params = sum(
+            p.numel() for p in self.model.parameters() if p.requires_grad)
         print("Number of parameters: ", pytorch_total_params/1000000, "M")
-        save_to_txtlog(self.logdir, 'model.txt', "Number of parameters: %.5f M" %(pytorch_total_params/1000000))
+        save_to_txtlog(self.logdir, 'model.txt', "Number of parameters: %.5f M" % (
+            pytorch_total_params/1000000))
 
     def set_loss_weight(self):
         """
@@ -110,10 +112,12 @@ class Trainer():
         epsilon_w = self.ARCH["train"]["epsilon_w"]
         content = torch.zeros(self.parser.get_n_classes(), dtype=torch.float)
         for cl, freq in self.DATA["content"].items():
-            x_cl = self.parser.to_xentropy(cl)   # map actual class to xentropy class
+            # map actual class to xentropy class
+            x_cl = self.parser.to_xentropy(cl)
             content[x_cl] += freq
         self.loss_w = 1 / (content + epsilon_w)  # get weights
-        for x_cl, w in enumerate(self.loss_w):   # ignore the ones necessary to ignore
+        # ignore the ones necessary to ignore
+        for x_cl, w in enumerate(self.loss_w):
             if self.DATA["learning_ignore"][x_cl]:    # don't weigh
                 self.loss_w[x_cl] = 0
         print("Loss weights from content: ", self.loss_w.data)
@@ -125,7 +129,8 @@ class Trainer():
             # self.dice = nn.DataParallel(self.dice).cuda()
         """
         # self.criterion = nn.NLLLoss(weight=self.loss_w).to(self.device)
-        self.criterion = nn.NLLLoss(weight=self.loss_w.double()).to(self.device)
+        self.criterion = nn.NLLLoss(
+            weight=self.loss_w.double()).to(self.device)
         self.bd = BoundaryLoss().to(self.device)
         if not point_refine:
             self.ls = Lovasz_softmax(ignore=0).to(self.device)
@@ -134,7 +139,8 @@ class Trainer():
 
         # loss as dataparallel too (more images in batch)
         if self.n_gpus > 1:
-            self.criterion = nn.DataParallel(self.criterion).cuda()  # spread in gpus
+            self.criterion = nn.DataParallel(
+                self.criterion).cuda()  # spread in gpus
             self.ls = nn.DataParallel(self.ls).cuda()
             self.bd = nn.DataParallel(self.bd).cuda()
 
@@ -146,7 +152,8 @@ class Trainer():
         self.multi_gpu = False
         self.n_gpus = 0
         self.model_single = self.model
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
         print("Training in device: ", self.device)
 
         if torch.cuda.is_available() and torch.cuda.device_count() > 0:
@@ -160,11 +167,11 @@ class Trainer():
             print(f"Let's use {torch.cuda.device_count()} GPUs!")
             self.model = nn.DataParallel(self.model)      # spread in gpus
             if self.ARCH["train"]["syncbn"]:
-                self.model = convert_model(self.model).cuda() # sync batchnorm
-            self.model_single = self.model.module         # single model to get weight names
+                self.model = convert_model(self.model).cuda()  # sync batchnorm
+            # single model to get weight names
+            self.model_single = self.model.module
             self.multi_gpu = True
             self.n_gpus = torch.cuda.device_count()
-
 
     def set_optim_scheduler(self):
         """
@@ -178,25 +185,29 @@ class Trainer():
                                            lr=dict["min_lr"],
                                            momentum=self.ARCH["train"]["sgd"]["momentum"],
                                            weight_decay=self.ARCH["train"]["sgd"]["w_decay"])
-            elif self.ARCH["train"]["optimizer"] == "adam": 
-                self.optimizer = optim.AdamW(self.model.parameters(), lr=dict["min_lr"])
-            
+            elif self.ARCH["train"]["optimizer"] == "adam":
+                self.optimizer = optim.AdamW(
+                    self.model.parameters(), lr=dict["min_lr"])
+
             self.scheduler = CosineAnnealingWarmUpRestarts(optimizer=self.optimizer,
                                                            T_0=dict["first_cycle"] * length, T_mult=dict["cycle"],
                                                            eta_max=dict["max_lr"],
                                                            T_up=dict["wup_epochs"]*length, gamma=dict["gamma"])
         elif self.ARCH["train"]["scheduler"] == "warmup":
             steps_per_epoch = self.parser.get_train_size()
-            up_steps = int(self.ARCH["train"]["warmup"]["wup_epochs"] * steps_per_epoch)
-            final_decay = self.ARCH["train"]["warmup"]["lr_decay"] ** (1 / steps_per_epoch)
-            
+            up_steps = int(self.ARCH["train"]["warmup"]
+                           ["wup_epochs"] * steps_per_epoch)
+            final_decay = self.ARCH["train"]["warmup"]["lr_decay"] ** (
+                1 / steps_per_epoch)
+
             if self.ARCH["train"]["optimizer"] == "sgd":
                 self.optimizer = optim.SGD([{'params': self.model.parameters()}],
                                            lr=self.ARCH["train"]["warmup"]["lr"],
                                            momentum=self.ARCH["train"]["sgd"]["momentum"],
                                            weight_decay=self.ARCH["train"]["sgd"]["w_decay"])
-            elif self.ARCH["train"]["optimizer"] == "adam": 
-                self.optimizer = optim.AdamW(self.model.parameters(), lr=self.ARCH["train"]["warmup"]["lr"])
+            elif self.ARCH["train"]["optimizer"] == "adam":
+                self.optimizer = optim.AdamW(
+                    self.model.parameters(), lr=self.ARCH["train"]["warmup"]["lr"])
 
             self.scheduler = warmupLR(optimizer=self.optimizer,
                                       lr=self.ARCH["train"]["warmup"]["lr"],
@@ -211,7 +222,8 @@ class Trainer():
         torch.nn.Module.dump_patches = True
         if not self.point_refine:
             checkpoint = self.pipeline + "_valid_best"
-            w_dict = torch.load(f"{self.path}/{checkpoint}", map_location=lambda storage, loc: storage)
+            w_dict = torch.load(f"{self.path}/{checkpoint}",
+                                map_location=lambda storage, loc: storage)
             self.model.load_state_dict(w_dict['state_dict'], strict=True)
             self.optimizer.load_state_dict(w_dict['optimizer'])
             self.epoch = w_dict['epoch'] + 1
@@ -222,12 +234,12 @@ class Trainer():
             print("load the pretrained model of {}".format(checkpoint))
         else:
             checkpoint = self.pipeline + "_valid_best"
-            w_dict = torch.load(f"{self.path}/{checkpoint}", map_location=lambda storage, loc: storage)
+            w_dict = torch.load(f"{self.path}/{checkpoint}",
+                                map_location=lambda storage, loc: storage)
             self.model.load_state_dict(w_dict['state_dict'], strict=True)
             # self.model.load_state_dict({k.replace('module.',''):v for k,v in w_dict['state_dict'].items()})
             self.optimizer.load_state_dict(w_dict['optimizer'])
             print("load the coarse model of {}".format(checkpoint))
-
 
     def calculate_estimate(self, epoch, iter):
         estimate = int((self.data_time_t.avg + self.batch_time_t.avg) *
@@ -242,7 +254,7 @@ class Trainer():
         # save scalars
         for tag, value in info.items():
             if 'valid_classes' in tag:
-                continue # solve the bug of saving tensor type of value
+                continue  # solve the bug of saving tensor type of value
             logger.add_scalar(tag, value, epoch)
 
         # save summaries of weights and biases
@@ -251,7 +263,8 @@ class Trainer():
                 tag = tag.replace('.', '/')
                 logger.add_histogram(tag, value.data.cpu().numpy(), epoch)
                 if value.grad is not None:
-                    logger.add_histogram(tag + '/grad', value.grad.data.cpu().numpy(), epoch)
+                    logger.add_histogram(
+                        tag + '/grad', value.grad.data.cpu().numpy(), epoch)
 
         if img_summary and len(imgs) > 0:
             directory = os.path.join(logdir, "predictions")
@@ -289,7 +302,8 @@ class Trainer():
                                                                      show_scans=self.ARCH["train"]["show_scans"])
 
             # update the info dict and save the training checkpoint
-            self.update_training_info(epoch, acc, iou, loss, update_mean, hetero_l)
+            self.update_training_info(
+                epoch, acc, iou, loss, update_mean, hetero_l)
 
             # evaluate on validation set
             if epoch % self.ARCH["train"]["report_epoch"] == 0:
@@ -349,25 +363,34 @@ class Trainer():
             if self.ARCH["train"]["aux_loss"]["use"]:
                 [output, z2, z4, z8] = model(in_vol)
                 lamda = self.ARCH["train"]["aux_loss"]["lamda"]
-                bdlosss = self.bd(output, proj_labels.long()) + lamda[0]*self.bd(z2, proj_labels.long()) + lamda[1]*self.bd(z4, proj_labels.long()) + lamda[2]*self.bd(z8, proj_labels.long())
-                loss_m0 = criterion(torch.log(output.clamp(min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(output, proj_labels.long())
-                loss_m2 = criterion(torch.log(z2.clamp(min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z2, proj_labels.long())
-                loss_m4 = criterion(torch.log(z4.clamp(min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z4, proj_labels.long())
-                loss_m8 = criterion(torch.log(z8.clamp(min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z8, proj_labels.long())
-                loss_m = loss_m0 + lamda[0]*loss_m2 + lamda[1]*loss_m4 + lamda[2]*loss_m8 + bdlosss
+                bdlosss = self.bd(output, proj_labels.long()) + lamda[0]*self.bd(z2, proj_labels.long(
+                )) + lamda[1]*self.bd(z4, proj_labels.long()) + lamda[2]*self.bd(z8, proj_labels.long())
+                loss_m0 = criterion(torch.log(output.clamp(
+                    min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(output, proj_labels.long())
+                loss_m2 = criterion(torch.log(z2.clamp(
+                    min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z2, proj_labels.long())
+                loss_m4 = criterion(torch.log(z4.clamp(
+                    min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z4, proj_labels.long())
+                loss_m8 = criterion(torch.log(z8.clamp(
+                    min=1e-8)).double(), proj_labels).float() + 1.5 * self.ls(z8, proj_labels.long())
+                loss_m = loss_m0 + lamda[0]*loss_m2 + \
+                    lamda[1]*loss_m4 + lamda[2]*loss_m8 + bdlosss
             else:
                 output, _ = model(in_vol)
                 bdlosss = self.bd(output, proj_labels.long())
-                loss_m = criterion(torch.log(output.clamp(min=1e-8)).double(), proj_labels).float() + self.ls(output, proj_labels.long()) + bdlosss
+                loss_m = criterion(torch.log(output.clamp(
+                    min=1e-8)).double(), proj_labels).float() + self.ls(output, proj_labels.long()) + bdlosss
 
             optimizer.zero_grad()
             if self.n_gpus > 1:
                 idx = torch.ones(self.n_gpus).cuda()
                 loss_m.backward(idx)
-                nn.utils.clip_grad.clip_grad_norm_(self.model.parameters(), max_norm=1, norm_type=2)
+                nn.utils.clip_grad.clip_grad_norm_(
+                    self.model.parameters(), max_norm=1, norm_type=2)
             else:
                 loss_m.backward()
-                nn.utils.clip_grad.clip_grad_norm_(self.model.parameters(), max_norm=1, norm_type=2)
+                nn.utils.clip_grad.clip_grad_norm_(
+                    self.model.parameters(), max_norm=1, norm_type=2)
             optimizer.step()
 
             # measure accuracy and record loss
@@ -396,8 +419,10 @@ class Trainer():
                 lr = g["lr"]
                 for value in g["params"]:
                     if value.grad is not None:
-                        w = np.linalg.norm(value.data.cpu().numpy().reshape((-1)))
-                        update = np.linalg.norm(-max(lr, 1e-10) * value.grad.cpu().numpy().reshape((-1)))
+                        w = np.linalg.norm(
+                            value.data.cpu().numpy().reshape((-1)))
+                        update = np.linalg.norm(-max(lr, 1e-10)
+                                                * value.grad.cpu().numpy().reshape((-1)))
                         update_ratios.append(update / max(w, 1e-10))
             update_ratios = np.array(update_ratios)
             update_mean = update_ratios.mean()
@@ -474,8 +499,8 @@ class Trainer():
                 evaluator.addBatch(argmax, proj_labels)
 
                 losses.update(loss.mean().item(), in_vol.size(0))
-                jaccs.update(jacc.mean().item(),in_vol.size(0))
-                wces.update(wce.mean().item(),in_vol.size(0))
+                jaccs.update(jacc.mean().item(), in_vol.size(0))
+                wces.update(wce.mean().item(), in_vol.size(0))
 
                 if save_scans:
                     # get the first scan in batch and project points
@@ -483,7 +508,8 @@ class Trainer():
                     depth_np = in_vol[0][0].cpu().numpy()
                     pred_np = argmax[0].cpu().numpy()
                     gt_np = proj_labels[0].cpu().numpy()
-                    out = make_log_img(depth_np, mask_np, pred_np, gt_np, color_fn)
+                    out = make_log_img(depth_np, mask_np,
+                                       pred_np, gt_np, color_fn)
                     rand_imgs.append(out)
 
                 # measure elapsed time
@@ -545,7 +571,8 @@ class Trainer():
                      'optimizer': self.optimizer.state_dict(),
                      'info': self.info,
                      'scheduler': self.scheduler.state_dict()}
-            save_checkpoint(state, self.logdir, self.pipeline, suffix="_train_best")
+            save_checkpoint(state, self.logdir, self.pipeline,
+                            suffix="_train_best")
 
     def update_validation_info(self, epoch, acc, iou, loss, hetero_l):
         # update info
@@ -556,7 +583,8 @@ class Trainer():
 
         # remember best iou and save checkpoint
         if self.info['valid_iou'] > self.info['best_val_iou']:
-            str_line = ("Best mean iou in validation so far, save model!\n" + "*" * 80)
+            str_line = (
+                "Best mean iou in validation so far, save model!\n" + "*" * 80)
             print(str_line)
             save_to_txtlog(self.logdir, 'log.txt', str_line)
             self.info['best_val_iou'] = self.info['valid_iou']
@@ -567,7 +595,8 @@ class Trainer():
                      'optimizer': self.optimizer.state_dict(),
                      'info': self.info,
                      'scheduler': self.scheduler.state_dict()}
-            save_checkpoint(state, self.logdir, self.pipeline, suffix="_valid_best")
+            save_checkpoint(state, self.logdir, self.pipeline,
+                            suffix="_valid_best")
 
             str_line = ("*" * 80 + '\n'
                         'Validation set:\n'

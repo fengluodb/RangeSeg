@@ -19,6 +19,7 @@ from postproc.KNN import KNN
 from modules.PointRefine.spvcnn import SPVCNN
 # from modules.PointRefine.spvcnn_lite import SPVCNN
 
+
 class User():
     def __init__(self, ARCH, DATA, datadir, outputdir, modeldir, split, point_refine=False):
         # parameters
@@ -36,52 +37,59 @@ class User():
         parserModule = imp.load_source("parserModule",
                                        f"{booger.TRAIN_PATH}/dataset/{self.DATA['name']}/parser.py")
         self.parser = Parser(root=self.datadir,
-                                train_sequences=self.DATA["split"]["train"],
-                                valid_sequences=self.DATA["split"]["valid"],
-                                test_sequences=self.DATA["split"]["test"],
-                                split=self.split,
-                                labels=self.DATA["labels"],
-                                color_map=self.DATA["color_map"],
-                                learning_map=self.DATA["learning_map"],
-                                learning_map_inv=self.DATA["learning_map_inv"],
-                                sensor=self.ARCH["dataset"]["sensor"],
-                                max_points=self.ARCH["dataset"]["max_points"],
-                                batch_size=self.infer_batch_size,
-                                workers=2, # self.ARCH["train"]["workers"],
-                                gt=True,
-                                shuffle_train=False)
+                             train_sequences=self.DATA["split"]["train"],
+                             valid_sequences=self.DATA["split"]["valid"],
+                             test_sequences=self.DATA["split"]["test"],
+                             split=self.split,
+                             labels=self.DATA["labels"],
+                             color_map=self.DATA["color_map"],
+                             learning_map=self.DATA["learning_map"],
+                             learning_map_inv=self.DATA["learning_map_inv"],
+                             sensor=self.ARCH["dataset"]["sensor"],
+                             max_points=self.ARCH["dataset"]["max_points"],
+                             batch_size=self.infer_batch_size,
+                             workers=2,  # self.ARCH["train"]["workers"],
+                             gt=True,
+                             shuffle_train=False)
 
         with torch.no_grad():
             torch.nn.Module.dump_patches = True
             if not point_refine:
                 self.set_model()
                 checkpoint = self.pipeline + "_valid_best"
-                w_dict = torch.load(f"{self.modeldir}/{checkpoint}", map_location=lambda storage, loc: storage)
+                w_dict = torch.load(
+                    f"{self.modeldir}/{checkpoint}", map_location=lambda storage, loc: storage)
                 try:
                     self.model = nn.DataParallel(self.model)
-                    self.model.load_state_dict(w_dict['state_dict'], strict=True)
+                    self.model.load_state_dict(
+                        w_dict['state_dict'], strict=True)
                 except:
                     self.set_model()
-                    self.model.load_state_dict(w_dict['state_dict'], strict=True)
+                    self.model.load_state_dict(
+                        w_dict['state_dict'], strict=True)
                 self.set_knn_post()
             else:
                 self.set_model()
                 self.model = nn.DataParallel(self.model)
                 checkpoint = self.pipeline + "_refine_module_valid_best"
-                w_dict = torch.load(f"{self.modeldir}/{checkpoint}", map_location=lambda storage, loc: storage)
+                w_dict = torch.load(
+                    f"{self.modeldir}/{checkpoint}", map_location=lambda storage, loc: storage)
                 # self.model.load_state_dict(w_dict['main_state_dict'], strict=True)
-                self.model.load_state_dict({f"module.{k}":v for k,v in w_dict['main_state_dict'].items()}, strict=True)
+                self.model.load_state_dict(
+                    {f"module.{k}": v for k, v in w_dict['main_state_dict'].items()}, strict=True)
 
                 net_config = {'num_classes': self.parser.get_n_classes(),
-                                 'cr': 1.0, 'pres': 0.05, 'vres': 0.05}
+                              'cr': 1.0, 'pres': 0.05, 'vres': 0.05}
                 self.refine_module = SPVCNN(num_classes=net_config['num_classes'],
                                             cr=net_config['cr'],
                                             pres=net_config['pres'],
                                             vres=net_config['vres'])
                 self.refine_module = nn.DataParallel(self.refine_module)
-                w_dict = torch.load(f"{modeldir}/{checkpoint}", map_location=lambda storage, loc: storage)
+                w_dict = torch.load(
+                    f"{modeldir}/{checkpoint}", map_location=lambda storage, loc: storage)
                 # self.refine_module.load_state_dict(w_dict['state_dict'], strict=True)
-                self.refine_module.load_state_dict({f"module.{k}":v for k,v in w_dict['refine_state_dict'].items()}, strict=True)
+                self.refine_module.load_state_dict(
+                    {f"module.{k}": v for k, v in w_dict['refine_state_dict'].items()}, strict=True)
 
         self.set_gpu_cuda()
 
@@ -99,7 +107,7 @@ class User():
             self.convert_relu_to_softplus(self.model, nn.SiLU())
         elif self.ARCH["train"]["act"] == "GELU":
             self.convert_relu_to_softplus(self.model, nn.GELU())
- 
+
     def convert_relu_to_softplus(self, model, act):
         for child_name, child in model.named_children():
             if isinstance(child, nn.LeakyReLU):
@@ -110,13 +118,15 @@ class User():
     def set_knn_post(self):
         # use knn post processing?
         if self.ARCH["post"]["KNN"]["use"]:
-            self.post = KNN(self.ARCH["post"]["KNN"]["params"], self.parser.get_n_classes())
+            self.post = KNN(self.ARCH["post"]["KNN"]
+                            ["params"], self.parser.get_n_classes())
 
     def set_gpu_cuda(self):
         # GPU?
         self.gpu = False
         self.model_single = self.model
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
         print("Infering in device: ", self.device)
         if torch.cuda.is_available() and torch.cuda.device_count() > 0:
             cudnn.benchmark = True
@@ -125,7 +135,6 @@ class User():
             self.model.cuda()
             if self.point_refine:
                 self.refine_module.cuda()
-
 
     def infer(self):
         cnn, knn = [], []
@@ -157,8 +166,10 @@ class User():
         else:
             raise NotImplementedError
 
-        print(f"Mean CNN inference time:{'%.8f'%np.mean(cnn)}\t std:{'%.8f'%np.std(cnn)}")
-        print(f"Mean KNN inference time:{'%.8f'%np.mean(knn)}\t std:{'%.8f'%np.std(knn)}")
+        print(
+            f"Mean CNN inference time:{'%.8f'%np.mean(cnn)}\t std:{'%.8f'%np.std(cnn)}")
+        print(
+            f"Mean KNN inference time:{'%.8f'%np.mean(knn)}\t std:{'%.8f'%np.std(knn)}")
         print(f"Total Frames: {len(cnn)}")
         print("Finished Infering")
 
@@ -195,7 +206,7 @@ class User():
                     if self.post:
                         proj_range = proj_range.cuda()
                         unproj_range = unproj_range.cuda()
-                
+
                 end = time.time()
                 # compute output
                 if self.ARCH["train"]["aux_loss"]["use"]:
@@ -233,5 +244,6 @@ class User():
                 # map to original label
                 pred_np = to_orig_fn(pred_np)
 
-                path = os.path.join(self.outputdir, "sequences", path_seq, "predictions", path_name)
+                path = os.path.join(self.outputdir, "sequences",
+                                    path_seq, "predictions", path_name)
                 pred_np.tofile(path)

@@ -9,9 +9,11 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=dilation, groups=groups, bias=False, dilation=dilation)
 
+
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+
 
 class BasicConv2d(nn.Module):
     def __init__(self, in_planes, out_planes, kernel_size, stride=1, padding=0, dilation=1, relu=True):
@@ -30,6 +32,7 @@ class BasicConv2d(nn.Module):
         if self.relu:
             x = self.relu(x)
         return x
+
 
 class Final_Model(nn.Module):
 
@@ -56,9 +59,11 @@ class BasicBlock(nn.Module):
         if self.if_BN:
             norm_layer = nn.BatchNorm2d
         if groups != 1 or base_width != 64:
-            raise ValueError('BasicBlock only supports groups=1 and base_width=64')
+            raise ValueError(
+                'BasicBlock only supports groups=1 and base_width=64')
         if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
+            raise NotImplementedError(
+                "Dilation > 1 not supported in BasicBlock")
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv3x3(inplanes, planes, stride)
         if self.if_BN:
@@ -106,7 +111,6 @@ class ResNet_34(nn.Module):
 
         self.groups = groups
         self.base_width = width_per_group
-
 
         self.conv1 = BasicConv2d(5, 64, kernel_size=1)
         self.conv2 = BasicConv2d(64, 128, kernel_size=1)
@@ -169,9 +173,12 @@ class ResNet_34(nn.Module):
         x_3 = self.layer3(x_2)  # 1/4
         x_4 = self.layer4(x_3)  # 1/8
 
-        res_2 = F.interpolate(x_2, size=x.size()[2:], mode='bilinear', align_corners=True)
-        res_3 = F.interpolate(x_3, size=x.size()[2:], mode='bilinear', align_corners=True)
-        res_4 = F.interpolate(x_4, size=x.size()[2:], mode='bilinear', align_corners=True)
+        res_2 = F.interpolate(
+            x_2, size=x.size()[2:], mode='bilinear', align_corners=True)
+        res_3 = F.interpolate(
+            x_3, size=x.size()[2:], mode='bilinear', align_corners=True)
+        res_4 = F.interpolate(
+            x_4, size=x.size()[2:], mode='bilinear', align_corners=True)
         res = [x, x_1, res_2, res_3, res_4]
         out = torch.cat(res, dim=1)
 
@@ -190,7 +197,6 @@ class ResNet_34(nn.Module):
 
             res_4 = self.aux_head3(res_4)
             res_4 = F.softmax(res_4, dim=1)
-
 
         if self.aux:
             return [out, res_2, res_3, res_4]

@@ -77,7 +77,8 @@ def range_projection(current_vertex, fov_up=3.0, fov_down=-25.0, proj_H=64, proj
 
     # get depth of all points
     depth = np.linalg.norm(current_vertex[:, :3], 2, axis=1)
-    current_vertex = current_vertex[(depth > 0) & (depth < max_range)]  # get rid of [0, 0, 0] points
+    current_vertex = current_vertex[(depth > 0) & (
+        depth < max_range)]  # get rid of [0, 0, 0] points
     depth = depth[(depth > 0) & (depth < max_range)]
 
     # get scan components
@@ -121,13 +122,18 @@ def range_projection(current_vertex, fov_up=3.0, fov_down=-25.0, proj_H=64, proj
     indices = np.arange(depth.shape[0])
     indices = indices[order]
 
-    proj_range = np.full((proj_H, proj_W), -1, dtype=np.float32)  # [H,W] range (-1 is no data)
-    proj_vertex = np.full((proj_H, proj_W, 4), -1, dtype=np.float32)  # [H,W] index (-1 is no data)
-    proj_idx = np.full((proj_H, proj_W), -1, dtype=np.int32)  # [H,W] index (-1 is no data)
-    proj_intensity = np.full((proj_H, proj_W), -1, dtype=np.float32)  # [H,W] index (-1 is no data)
+    # [H,W] range (-1 is no data)
+    proj_range = np.full((proj_H, proj_W), -1, dtype=np.float32)
+    # [H,W] index (-1 is no data)
+    proj_vertex = np.full((proj_H, proj_W, 4), -1, dtype=np.float32)
+    # [H,W] index (-1 is no data)
+    proj_idx = np.full((proj_H, proj_W), -1, dtype=np.int32)
+    # [H,W] index (-1 is no data)
+    proj_intensity = np.full((proj_H, proj_W), -1, dtype=np.float32)
 
     proj_range[proj_y, proj_x] = depth
-    proj_vertex[proj_y, proj_x] = np.array([scan_x, scan_y, scan_z, np.ones(len(scan_x))]).T
+    proj_vertex[proj_y, proj_x] = np.array(
+        [scan_x, scan_y, scan_z, np.ones(len(scan_x))]).T
     proj_idx[proj_y, proj_x] = indices
     proj_intensity[proj_y, proj_x] = intensity
 
@@ -224,7 +230,8 @@ def load_vertex(scan_path):
     current_vertex = np.fromfile(scan_path, dtype=np.float32)
     current_vertex = current_vertex.reshape((-1, 4))
     current_points = current_vertex[:, 0:3]
-    current_vertex = np.ones((current_points.shape[0], current_points.shape[1] + 1))
+    current_vertex = np.ones(
+        (current_points.shape[0], current_points.shape[1] + 1))
     current_vertex[:, :-1] = current_points
     return current_vertex
 

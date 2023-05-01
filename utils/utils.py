@@ -24,7 +24,8 @@ def millify(n, precision=0, drop_nulls=True, prefixes=[]):
     n = float(n)
     millidx = max(0, min(len(millnames) - 1,
                          int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
-    result = '{:.{precision}f}'.format(n / 10**(3 * millidx), precision=precision)
+    result = '{:.{precision}f}'.format(
+        n / 10**(3 * millidx), precision=precision)
     if drop_nulls:
         result = remove_exponent(Decimal(result))
     return '{0}{dx}'.format(result, dx=millnames[millidx])
@@ -32,7 +33,7 @@ def millify(n, precision=0, drop_nulls=True, prefixes=[]):
 
 def str2bool(v):
     if isinstance(v, bool):
-       return v
+        return v
     if v.lower() in ('yes', 'true', 't', 'y'):
         return True
     elif v.lower() in ('no', 'false', 'f', 'n'):
@@ -60,9 +61,11 @@ def check_and_makedirs(dir_path):
 def check_pretrained_dir(path):
     if path is not None:
         if os.path.isdir(path):
-            print("\033[32m model folder exists! Using model from %s \033[0m" % (path))
+            print(
+                "\033[32m model folder exists! Using model from %s \033[0m" % (path))
         else:
-            print("\033[32m model folder doesnt exist! Start with random weights...\033[0m")
+            print(
+                "\033[32m model folder doesnt exist! Start with random weights...\033[0m")
     else:
         print("\033[32m No pretrained directory found.\033[0m")
 
@@ -70,7 +73,8 @@ def check_pretrained_dir(path):
 def check_model_dir(path):
     if path is not None:
         if os.path.isdir(path):
-            print("\033[32m model folder exists! Using model from %s \033[0m" % (path))
+            print(
+                "\033[32m model folder exists! Using model from %s \033[0m" % (path))
         else:
             print("\033[32m model folder doesnt exist! Can't infer...\033[0m")
             quit()
@@ -85,7 +89,8 @@ def make_logdir(FLAGS, resume_train=False):
                 FLAGS.pretrained = None
                 if os.path.isdir(FLAGS.log):
                     if os.listdir(FLAGS.log):
-                        answer = raw_input("Log Directory is not empty. Do you want to proceed? [y/n]  ")
+                        answer = raw_input(
+                            "Log Directory is not empty. Do you want to proceed? [y/n]  ")
                         if answer == 'n':
                             quit()
                         else:
@@ -97,7 +102,8 @@ def make_logdir(FLAGS, resume_train=False):
         else:
             if os.path.isdir(FLAGS.log):
                 if os.listdir(FLAGS.log):
-                    answer = raw_input("Log Directory is not empty. Do you want to proceed? [y/n]  ")
+                    answer = raw_input(
+                        "Log Directory is not empty. Do you want to proceed? [y/n]  ")
                     if answer == 'n':
                         quit()
                     else:
@@ -120,13 +126,19 @@ def backup_to_logdir(FLAGS, pretrain_model=False):
         # Backup training code for later review
         code_backup_path = f"{FLAGS.log}/code"
         check_and_makedirs(code_backup_path)
-        os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', '*.py'))} {code_backup_path}")
-        os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'common'))} {code_backup_path}")
-        os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'config'))} {code_backup_path}")
-        os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'modules'))} {code_backup_path}")
-        os.system(f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'utils'))} {code_backup_path}")
+        os.system(
+            f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', '*.py'))} {code_backup_path}")
+        os.system(
+            f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'common'))} {code_backup_path}")
+        os.system(
+            f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'config'))} {code_backup_path}")
+        os.system(
+            f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'modules'))} {code_backup_path}")
+        os.system(
+            f"cp -r {os.path.abspath(os.path.join(os.path.dirname(__file__), '../', 'utils'))} {code_backup_path}")
         if pretrain_model:
-            shutil.copyfile(FLAGS.pretrained + "/LTNet_valid_best", FLAGS.log + "/LTNet_valid_best")
+            shutil.copyfile(FLAGS.pretrained + "/LTNet_valid_best",
+                            FLAGS.log + "/LTNet_valid_best")
 
     except Exception as e:
         print(e)
@@ -143,11 +155,12 @@ def make_predictions_dir(FLAGS, DATA, rm_old=False):
             os.makedirs(FLAGS.log)
             os.makedirs(os.path.join(FLAGS.log, "sequences"))
         check_and_makedirs(os.path.join(FLAGS.log, "sequences"))
-        
+
         for seq in DATA["split"][FLAGS.split]:
             seq = '{0:02d}'.format(int(seq))
             print(f"{FLAGS.split} : {seq}")
-            check_and_makedirs(os.path.join(FLAGS.log, "sequences", seq, "predictions"))
+            check_and_makedirs(os.path.join(
+                FLAGS.log, "sequences", seq, "predictions"))
 
     except Exception as e:
         print(e)
@@ -183,7 +196,7 @@ def get_args(flags=None):
     #     type=str2bool, nargs='?',
     #     const=True, default=True,
     #     help='Set this if you want to use the Uncertainty Version')
-    
+
     if flags == "train":
         parser.add_argument(
             '--pretrained', '-p', type=str,
