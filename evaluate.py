@@ -160,6 +160,8 @@ if __name__ == '__main__':
     lidar_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
+        if DATA["name"] == "nusc":
+            sequence = '{0:04d}'.format(int(sequence))
         label_paths = os.path.join(
             FLAGS.dataset, "sequences", str(sequence), "labels")
         # populate the label names
@@ -182,6 +184,8 @@ if __name__ == '__main__':
     pred_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
+        if DATA["name"] == "nusc":
+            sequence = '{0:04d}'.format(int(sequence))
         pred_paths = os.path.join(
             FLAGS.predictions, "sequences", sequence, "predictions")
         # populate the label names
