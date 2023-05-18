@@ -37,6 +37,9 @@ if __name__ == '__main__':
         elif DATA["name"] == "poss":
             user = UserPoss(ARCH, DATA, datadir=FLAGS.dataset, outputdir=FLAGS.log,
                             modeldir=FLAGS.model, split=FLAGS.split)
+        elif DATA["name"] == "nusc":
+            user = UserNusc(ARCH, DATA, datadir=FLAGS.dataset, outputdir=FLAGS.log,
+                            modeldir=FLAGS.model, split=FLAGS.split)
         else:
             raise ValueError("unsupported dataset {}".format(DATA["name"]))
     else:

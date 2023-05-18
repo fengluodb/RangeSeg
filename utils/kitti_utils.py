@@ -60,6 +60,16 @@ def load_calib(calib_path):
     return np.array(T_cam_velo)
 
 
+def load_lidar_token(lidar_token_file_path):
+    array = []
+
+    with open(lidar_token_file_path, "r") as file:
+        for line in file:
+            array.append(line.strip())
+    
+    return array
+
+
 def range_projection(current_vertex, fov_up=3.0, fov_down=-25.0, proj_H=64, proj_W=900, max_range=50):
     """ Project a pointcloud into a spherical projection, range image.
         Args:

@@ -10,17 +10,15 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
-from dataset.kitti.parser import Parser
 import __init__ as booger
 
 from tqdm import tqdm
-from postproc.KNN import KNN
+from modules.user import User
+from dataset.nuscenes.parser import Parser
 
 from modules.PointRefine.spvcnn import SPVCNN
-# from modules.PointRefine.spvcnn_lite import SPVCNN
 
-
-class User():
+class UserNusc(User):
     def __init__(self, ARCH, DATA, datadir, outputdir, modeldir, split, point_refine=False):
         # parameters
         self.ARCH = ARCH
@@ -93,93 +91,7 @@ class User():
 
         self.set_gpu_cuda()
 
-    def set_model(self):
-        if self.pipeline == "LENet":
-            from modules.network.LENet import ResNet_34
-            self.model = ResNet_34(self.parser.get_n_classes(), self.ARCH)
-        elif self.pipeline == "Fid":
-            from modules.network.Fid import ResNet_34
-            self.model = ResNet_34(self.parser.get_n_classes(), self.ARCH)
-        elif self.pipeline == "CENet":
-            from modules.network.CENet import ResNet_34
-            self.model = ResNet_34(self.parser.get_n_classes(), self.ARCH)
-
-        if self.ARCH["train"]["act"] == "Hardswish":
-            self.convert_relu_to_softplus(self.model, nn.Hardswish())
-        elif self.ARCH["train"]["act"] == "SiLU":
-            self.convert_relu_to_softplus(self.model, nn.SiLU())
-        elif self.ARCH["train"]["act"] == "GELU":
-            self.convert_relu_to_softplus(self.model, nn.GELU())
-
-    def convert_relu_to_softplus(self, model, act):
-        for child_name, child in model.named_children():
-            if isinstance(child, nn.LeakyReLU):
-                setattr(model, child_name, act)
-            else:
-                self.convert_relu_to_softplus(child, act)
-
-    def set_knn_post(self):
-        # use knn post processing?
-        if self.ARCH["post"]["KNN"]["use"]:
-            self.post = KNN(self.ARCH["post"]["KNN"]
-                            ["params"], self.parser.get_n_classes())
-
-    def set_gpu_cuda(self):
-        # GPU?
-        self.gpu = False
-        self.model_single = self.model
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
-        print("Infering in device: ", self.device)
-        if torch.cuda.is_available() and torch.cuda.device_count() > 0:
-            cudnn.benchmark = True
-            cudnn.fastest = True
-            self.gpu = True
-            self.model.cuda()
-            if self.point_refine:
-                self.refine_module.cuda()
-
-    def infer(self):
-        cnn, knn = [], []
-
-        if self.split == 'valid':
-            self.infer_subset(loader=self.parser.get_valid_set(),
-                              to_orig_fn=self.parser.to_original,
-                              cnn=cnn, knn=knn)
-        elif self.split == 'train':
-            self.infer_subset(loader=self.parser.get_train_set(),
-                              to_orig_fn=self.parser.to_original,
-                              cnn=cnn, knn=knn)
-        elif self.split == 'test':
-            self.infer_subset(loader=self.parser.get_test_set(),
-                              to_orig_fn=self.parser.to_original,
-                              cnn=cnn, knn=knn)
-        elif self.split == None:
-            self.infer_subset(loader=self.parser.get_train_set(),
-                              to_orig_fn=self.parser.to_original,
-                              cnn=cnn, knn=knn)
-            # do valid set
-            self.infer_subset(loader=self.parser.get_valid_set(),
-                              to_orig_fn=self.parser.to_original,
-                              cnn=cnn, knn=knn)
-            # do test set
-            self.infer_subset(loader=self.parser.get_test_set(),
-                              to_orig_fn=self.parser.to_original,
-                              cnn=cnn, knn=knn)
-        else:
-            raise NotImplementedError
-
-        print(
-            f"Mean CNN inference time:{'%.8f'%np.mean(cnn)}\t std:{'%.8f'%np.std(cnn)}")
-        print(
-            f"Mean KNN inference time:{'%.8f'%np.mean(knn)}\t std:{'%.8f'%np.std(knn)}")
-        print(f"Total Frames: {len(cnn)}")
-        print("Finished Infering")
-
-        return
-
     def infer_subset(self, loader, to_orig_fn, cnn, knn):
-
         # switch to evaluate mode
         self.model.eval()
 
@@ -192,7 +104,7 @@ class User():
             end = time.time()
 
             for i, (proj_in, proj_mask, _, _, path_seq, path_name,
-                    p_x, p_y, proj_range, unproj_range, _, _, _, _, npoints)\
+                    p_x, p_y, proj_range, unproj_range, _, _, _, _, npoints, lidar_token)\
                     in enumerate(tqdm(loader, ncols=80)):
                 # first cut to rela size (batch size one allows it)
                 p_x = p_x[0, :npoints]
@@ -247,6 +159,9 @@ class User():
                 # map to original label
                 pred_np = to_orig_fn(pred_np)
 
-                path = os.path.join(self.outputdir, "sequences",
-                                    path_seq, "predictions", path_name)
+                if self.split == "test":
+                    path = os.path.join(self.outputdir, "v1.0-test", "{}_lidarseg.bin".format(lidar_token))
+                else:
+                    path = os.path.join(self.outputdir, "sequences",
+                                        path_seq, "predictions", path_name)
                 pred_np.tofile(path)

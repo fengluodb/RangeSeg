@@ -1,3 +1,4 @@
+name: nusc
 orig_labels:
   0: 'noise'
   1: 'animal'

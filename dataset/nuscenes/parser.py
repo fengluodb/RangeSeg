@@ -8,7 +8,7 @@ import torch
 import random
 
 from collections.abc import Sequence, Iterable
-from utils.kitti_utils import load_poses, load_calib
+from utils.kitti_utils import load_poses, load_calib, load_lidar_token
 
 EXTENSIONS_SCAN = ['.bin']
 EXTENSIONS_LABEL = ['.label']
@@ -131,6 +131,7 @@ class SemanticKitti(Dataset):
 
         # placeholder for filenames
         self.scan_files = {}
+        self.lidar_token = {}
         self.label_files = {}
         self.poses = {}
         if self.use_residual:
@@ -176,6 +177,11 @@ class SemanticKitti(Dataset):
             T_cam_velo = load_calib(calib_file)
             T_cam_velo = np.asarray(T_cam_velo).reshape((4, 4))
             T_velo_cam = np.linalg.inv(T_cam_velo)
+
+            # load lidar token
+            lidar_token_file = os.path.join(self.root, seq, "lidar_tokens.txt")
+            lidar_token = load_lidar_token(lidar_token_file)
+            self.lidar_token[seq] = lidar_token
 
             # convert kitti poses from camera coord to LiDAR coord
             new_poses = []
@@ -239,6 +245,7 @@ class SemanticKitti(Dataset):
         for index in range(start_index, start_index + 1):
             # get item in tensor shape
             scan_file = self.scan_files[seq][index]
+            lidar_token = self.lidar_token[seq][index]
             if self.gt:
                 label_file = self.label_files[seq][index]
 
@@ -391,7 +398,7 @@ class SemanticKitti(Dataset):
         # 		proj_labels = torch.flip(proj_labels, [-1])
 
         return proj_full, proj_mask, proj_labels, unproj_labels, path_seq, path_name, proj_x, proj_y, proj_range, \
-            unproj_range, proj_xyz, unproj_xyz, proj_remission, unproj_remissions, unproj_n_points
+            unproj_range, proj_xyz, unproj_xyz, proj_remission, unproj_remissions, unproj_n_points, lidar_token
 
     def __len__(self):
         return self.dataset_size
