@@ -157,7 +157,10 @@ def make_predictions_dir(FLAGS, DATA, rm_old=False):
         check_and_makedirs(os.path.join(FLAGS.log, "sequences"))
 
         for seq in DATA["split"][FLAGS.split]:
-            seq = '{0:02d}'.format(int(seq))
+            if DATA["name"] == "nusc": 
+                seq = '{0:04d}'.format(int(seq))
+            else:
+                seq = '{0:02d}'.format(int(seq))
             print(f"{FLAGS.split} : {seq}")
             check_and_makedirs(os.path.join(
                 FLAGS.log, "sequences", seq, "predictions"))

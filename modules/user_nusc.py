@@ -16,7 +16,6 @@ from tqdm import tqdm
 from modules.user import User
 from dataset.nuscenes.parser import Parser
 
-from modules.PointRefine.spvcnn import SPVCNN
 
 class UserNusc(User):
     def __init__(self, ARCH, DATA, datadir, outputdir, modeldir, split, point_refine=False):
@@ -32,8 +31,6 @@ class UserNusc(User):
         self.point_refine = point_refine
         self.pipeline = self.ARCH["train"]["pipeline"]
         # get the data
-        parserModule = imp.load_source("parserModule",
-                                       f"{booger.TRAIN_PATH}/dataset/{self.DATA['name']}/parser.py")
         self.parser = Parser(root=self.datadir,
                              train_sequences=self.DATA["split"]["train"],
                              valid_sequences=self.DATA["split"]["valid"],
@@ -67,6 +64,7 @@ class UserNusc(User):
                         w_dict['state_dict'], strict=True)
                 self.set_knn_post()
             else:
+                from modules.PointRefine.spvcnn import SPVCNN
                 self.set_model()
                 self.model = nn.DataParallel(self.model)
                 checkpoint = self.pipeline + "_refine_module_valid_best"
