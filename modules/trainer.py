@@ -89,6 +89,9 @@ class Trainer():
             elif self.pipeline == "Fid":
                 from modules.network.Fid import ResNet_34
                 self.model = ResNet_34(self.parser.get_n_classes(), self.ARCH)
+            elif self.pipeline == "CENet":
+                from modules.network.CENet import ResNet_34
+                self.model = ResNet_34(self.parser.get_n_classes(), self.ARCH)
 
             if self.ARCH["train"]["act"] == "Hardswish":
                 self.convert_relu_to_softplus(self.model, nn.Hardswish())

@@ -37,6 +37,22 @@ dataset
         └── 05
 ```
 
+### Nuscenes
+Download the nuScenes dataset from [here](https://nuscenes.org/nuscenes). Using the [nuscenes2kitti.py](/utils/nuscenes2kitti.py) to nuScenes into SemanticKITTI-compatible format, you can follw the instructions in [here](https://github.com/PRBonn/nuscenes2kitti):
+```sh
+python3 utils/nuscenes2kitti.py --nuscenes_dir <nuscenes_directory> --output_dir <output_directory>
+```
+the final format look like this:
+```sh
+dataset/Nuscene-KITTI/
+└── sequences
+    ├── 0001
+    ├── 0002
+    ├── ...
+    ├── 1109
+    └── 1110
+```
+
 ## Training
 
 ### SemanticKITTI
@@ -53,12 +69,23 @@ python train.py -d DATAROOT -ac config/arch/LENet.yaml -dc config/labels/semanti
 ### SemanticPOSS
 To train a network (from scratch):
 ```sh
-python train.py -d DATAROOT -ac config/arch/LENet_poss.yaml -dc config/labels/semantic-poss.yaml -l logs/LENet-POSS
+python train_poss.py -d DATAROOT -ac config/arch/LENet_poss.yaml -dc config/labels/semantic-poss.yaml -l logs/LENet-POSS
 ```
 
 To train a network (from pretrained model):
 ```sh
-python train.py -d DATAROOT -ac config/arch/LENet_poss.yaml -dc config/labels/semantic-poss.yaml -l logs/LENet-POSS -p "logs/LENet-POSS/TIMESTAMP""
+python train_poss.py -d DATAROOT -ac config/arch/LENet_poss.yaml -dc config/labels/semantic-poss.yaml -l logs/LENet-POSS -p "logs/LENet-POSS/TIMESTAMP""
+```
+
+### Nuscenes
+To train a network (from scratch):
+```sh
+python train_nusc.py -d DATAROOT -ac config/arch/LENet_nusc.yaml -dc config/labels/semantic-nuscenes.yaml -l logs/LENet-Nusc
+```
+
+To train a network (from pretrained model):
+```sh
+python train_nusc.py -d DATAROOT -ac config/arch/LENet_nusc.yaml -dc config/labels/semantic-nuscenes.yaml -l logs/LENet-Nusc -p "logs/LENet-Nusc/TIMESTAMP""
 ```
 
 ## Inference
@@ -73,6 +100,13 @@ python infer.py -d DATAROOT -m "logs/LENet-KITTI/TIMESTAMP" -l /path/for/predict
 python infer.py -d DATAROOT -m "logs/LENet-POSS/TIMESTAMP" -l /path/for/predictions -s valid
 ```
 
+### Nuscenes
+```sh
+python infer.py -d DATAROOT -m "logs/LENet-KITTI/TIMESTAMP" -l /path/for/predictions -s valid/test
+```
+
+> warning: if you infer the test dataset, I have converted the result format into nuScenes format. But the output have label 0 in prediction. Therefore, the result can't pass the [valid submisson script](/utils/validate_submission.py) of nuScenes. I will find a way to solve it.
+
 ## Evalution
 
 ### SemanticKITTI
@@ -83,6 +117,11 @@ python evaluate.py -d DATAROOT -p /path/for/predictions -dc config/labels/semant
 ### SemanticPOSS
 ```sh
 python evaluate.py -d DATAROOT -p /path/for/predictions -dc config/labels/semantic-poss.yaml
+```
+
+### Nuscenes
+```sh
+python evaluate.py -d DATAROOT -p /path/for/predictions -dc config/labels/semantic-nuscenes.yaml
 ```
 
 ## Pretrained Models and Predictions
