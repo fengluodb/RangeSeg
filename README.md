@@ -126,12 +126,12 @@ python evaluate.py -d DATAROOT -p /path/for/predictions -dc config/labels/semant
 
 ## Pretrained Models and Predictions
 
-| dataset | test mIoU |  Download |
+| dataset | mIoU |  Download |
 |---------------|:----:|:-----------:|
-| [SemanticKITTI(single)](config/arch/LENet.yaml) | 64.5 | [Model Weight And Predictions](https://drive.google.com/drive/folders/1ejoInYl8BVzg3t69_ig4tDUYstaz--Ns?usp=sharing) |
-| [SemanticKITTI(multi)](config/arch/LENet.yaml) | 53.0 | [Model Weight And Predictions](https://drive.google.com/drive/folders/1OfktGL85mFmdRALBb-_Zpc8VSmjXJVYU?usp=sharing) |
-| [SemanticPOSS](config/arch/LENet_poss.yaml) | 53.8 | [Model Weight And Predictions](https://drive.google.com/drive/folders/1oECv2GRCXZ1RIQVVum-mRwZbod8pxVA8) |
-
+| [SemanticKITTI(single)](config/arch/LENet.yaml) | 64.5(test) | [Model Weight And Predictions](https://drive.google.com/drive/folders/1ejoInYl8BVzg3t69_ig4tDUYstaz--Ns?usp=sharing) |
+| [SemanticKITTI(multi)](config/arch/LENet.yaml) | 53.0(test) | [Model Weight And Predictions](https://drive.google.com/drive/folders/1OfktGL85mFmdRALBb-_Zpc8VSmjXJVYU?usp=sharing) |
+| [SemanticPOSS](config/arch/LENet_poss.yaml) | 53.8(test) | [Model Weight And Predictions](https://drive.google.com/drive/folders/1oECv2GRCXZ1RIQVVum-mRwZbod8pxVA8) |
+| [Nuscenes](config/arch/LENet_nusc.yaml) | 64.0(valid) | [Model Weight And Predictions](https://drive.google.com/drive/folders/1gFng2Ob3Papqddh4jK6g6cJeh2KWpS0f) |
 ## Acknowlegment
 
 This repo is built based on [MotionSeg3D](https://github.com/haomo-ai/MotionSeg3D), [FIDNet](https://github.com/placeforyiming/IROS21-FIDNet-SemanticKITTI) and [CENet](https://github.com/huixiancheng/CENet). Thanks the contributors of these repos!
