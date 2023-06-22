@@ -2,10 +2,10 @@
 # training parameters
 ################################################################################
 train:
-  pipeline: "Fid"  # model name 
+  pipeline: "CENet"  # model name 
   loss: "xentropy"       # must be either xentropy or iou
   max_epochs: 50
-  batch_size: 6         # batch size
+  batch_size: 48         # batch size
   report_batch: 10       # every x batches, report loss
   report_epoch: 1        # every x epochs, report validation set
   epsilon_w: 0.001       # class weight w = 1 / (content + epsilon_w)
@@ -16,7 +16,7 @@ train:
   workers: 12             # number of threads to get data
 
   syncbn: True           # sync batchnorm
-  act: LeakyReLU         # act layer
+  act: Hardswish              # act layer, LeakyReLU, SiLU, Hardswish, GELU
 
   optimizer: "adam"  # sgd or adam
 
@@ -25,7 +25,7 @@ train:
     min_lr: 0.00001
     max_lr: 0.00200
     first_cycle: 50
-    cycle: 1
+    cycle: 2
     wup_epochs: 1
     gamma: 1.0
   warmup:
@@ -35,7 +35,7 @@ train:
     momentum: 0.9          # sgd momentum
 
   aux_loss:
-    use: False
+    use: True
     lamda: [1.0, 1.0, 1.0]
   
   # for mos
@@ -51,7 +51,7 @@ post:
     train: True
     params: False # this should be a dict when in use
   KNN:
-    use: True # This parameter default is false
+    use: False  # This parameter default is false
     params:
       knn: 7
       search: 7
@@ -63,29 +63,41 @@ post:
 ################################################################################
 # dataset (to find parser)
 dataset:
-  labels: "poss"
-  scans: "poss"
-  max_points: 72000 # max of any scan in dataset
+  labels: "kitti"
+  scans: "kitti"
+  max_points: 35000 # max of any scan in dataset
   sensor:
-    name: "Pandora"
+    name: "HDL32"
     type: "spherical" # projective
-    fov_up: 7
-    fov_down: -16
+    fov_up: 10
+    fov_down: -30
     img_prop:
-      width: 1800
-      height: 40
-    img_means: #range,x,y,z,signal   (40, 1800)
-      - 22.26779
-      - 0.51144063
-      - 1.5727469
-      - -0.6350901
-      - 13.875261
+      width:  1024
+      height: 32
+    img_means: #range,x,y,z,signal
+      - 1.7835
+      - 0.0325
+      - 0.1707
+      - 0.0283
+      - 2.7328
     img_stds: #range,x,y,z,signal
-      - 17.735949
-      - 17.422485
-      - 22.217215
-      - 1.6433295
-      - 14.0925865
+      - 9.5803
+      - 6.7944
+      - 8.1486
+      - 1.1270
+      - 17.4203
+    # img_means: #range,x,y,z,signal
+    #   - 12.12
+    #   - 10.88
+    #   - 0.23
+    #   - -1.04
+    #   - 0.21
+    # img_stds: #range,x,y,z,signal
+    #   - 12.32
+    #   - 11.47
+    #   - 6.91
+    #   - 0.86
+    #   - 0.16
       
     # for mos
     n_input_scans: 2  # This needs to be the same as in the backbone params above!
