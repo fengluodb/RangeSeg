@@ -1,5 +1,5 @@
 # LENet
-> This is the official implementation of **LENet: Lightweight And Efficient LiDAR Semantic Segmentation Using Multi-Scale Convolution Attention**[[Paper](https://arxiv.org/pdf/2301.04275.pdf)]. 
+> This is the official implementation of **LENet: Lightweight And Efficient LiDAR Semantic Segmentation Using Multi-Scale Convolution Attention**. 
 ## Demo
 <p align="center"> <img src="assert/Network.png" width="100%"></a> </p>
 
