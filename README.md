@@ -1,5 +1,5 @@
-# LENet
-> This is the official implementation of **LENet: Lightweight And Efficient LiDAR Semantic Segmentation Using Multi-Scale Convolution Attention**. 
+# RangeSeg
+> This is the official implementation of **RangeSeg: Efficient Lidar Semantic Segmentation on Range view**. 
 ## Demo
 <p align="center"> <img src="assert/Network.png" width="100%"></a> </p>
 
