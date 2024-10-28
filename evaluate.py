@@ -222,7 +222,10 @@ if __name__ == '__main__':
                 radius_mask = np.logical_and(depth <= FLAGS.radius, depth >= 2)
 
         # open label
-        label = np.fromfile(label_file, dtype=np.int32)
+        if DATA["name"] == "nusc":
+            label = np.fromfile(label_file, dtype=np.uint8)
+        else:
+            label = np.fromfile(label_file, dtype=np.int32)
         label = label.reshape((-1))  # reshape to vector
         label = label & 0xFFFF       # get lower half for semantics
         if FLAGS.limit is not None:
@@ -230,7 +233,10 @@ if __name__ == '__main__':
         label = remap_lut[label]         # remap to xentropy format
 
         # open prediction
-        pred = np.fromfile(pred_file, dtype=np.int32)
+        if DATA["name"] == "nusc":
+            pred = np.fromfile(pred_file, dtype=np.uint8)
+        else:
+            pred = np.fromfile(pred_file, dtype=np.int32)
         pred = pred.reshape((-1))    # reshape to vector
         pred = pred & 0xFFFF         # get lower half for semantics
         if FLAGS.limit is not None:
