@@ -125,8 +125,12 @@ if __name__ == '__main__':
     maxkey = max(class_remap.keys())
 
     # +100 hack making lut bigger just in case there are unknown labels
-    remap_lut = np.zeros((maxkey + 100), dtype=np.int32)
-    remap_lut[list(class_remap.keys())] = list(class_remap.values())
+    if DATA["name"] == "nusc":
+        remap_lut = np.zeros((maxkey + 100), dtype=np.uint8)
+        remap_lut[list(class_remap.keys())] = list(class_remap.values())
+    else:
+        remap_lut = np.zeros((maxkey + 100), dtype=np.int32)
+        remap_lut[list(class_remap.keys())] = list(class_remap.values())
     # print(remap_lut)
 
     # create evaluator
