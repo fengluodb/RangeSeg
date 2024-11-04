@@ -153,10 +153,10 @@ class UserNusc(User):
 
                 # save scan # get the first scan in batch and project scan
                 pred_np = unproj_argmax.cpu().numpy()
-                pred_np = pred_np.reshape((-1)).astype(np.uin8)
+                pred_np = pred_np.reshape((-1)).astype(np.int32)
 
                 # map to original label
-                # pred_np = to_orig_fn(pred_np)
+                pred_np = to_orig_fn(pred_np)
 
                 if self.split == "test":
                     path = os.path.join(self.outputdir, "v1.0-test", "{}_lidarseg.bin".format(lidar_token[0]))
